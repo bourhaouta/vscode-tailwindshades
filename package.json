@@ -1,0 +1,69 @@
+{
+  "name": "tailwindshades",
+  "displayName": "Tailwind Shades",
+  "description": "Tailwind CSS color palette generator",
+  "version": "0.0.5",
+  "author": "Omar Bourhaouta<bourhaouta@gmail.com>",
+  "homepage": "https://github.com/bourhaouta/vscode-tailwindshades",
+  "bugs": {
+    "url": "https://github.com/bourhaouta/vscode-tailwindshades/issues",
+    "email": "bourhaouta@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bourhaouta/vscode-tailwindshades.git"
+  },
+  "publisher": "bourhaouta",
+  "keywords": [
+    "tailwind",
+    "tailwindcss",
+    "css",
+    "color",
+    "palette"
+  ],
+  "galleryBanner": {
+    "color": "#f1f5f8"
+  },
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.32.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:tailwindshades.generateColorPalette"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "category": "TailwindShades",
+        "command": "tailwindshades.generateColorPalette",
+        "title": "Generate custom color palette"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "tailwindshades.generateColorPalette",
+        "key": "ctrl+k ctrl+g",
+        "mac": "cmd+k cmd+g",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint"
+  },
+  "devDependencies": {
+    "@types/node": "^13.11.0",
+    "@types/vscode": "^1.32.0",
+    "eslint": "^6.8.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "hex-to-color-name": "^1.0.1",
+    "values.js": "^2.0.0"
+  }
+}
