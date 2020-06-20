@@ -2,7 +2,7 @@
 
 [Tailwind CSS](https://tailwindcss.com/) color palette generator.
 
-**[Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=bourhaouta.vscode-tailwindshades)**
+**[Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades)**
 
 <img src="https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/master/media/demo.gif" alt="HTML autocompletion" width="750">
 
