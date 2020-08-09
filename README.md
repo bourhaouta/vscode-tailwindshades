@@ -6,6 +6,9 @@
 
 <img src="https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/master/media/demo.gif" alt="HTML autocompletion" width="750">
 
+-or-
+<img src="https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/master/media/demo-css-cars.gif" alt="How to use the shades plugin to generate CSS Variables" width="750">
+
 ## Usage
 
 Default keybinding:
