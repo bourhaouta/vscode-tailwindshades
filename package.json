@@ -32,7 +32,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:tailwindshades.generateColorPalette"
+    "onCommand:tailwindshades.generateColorPalette",
+    "onCommand:tailwindshades.generateColorPaletteCSSVars"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -41,6 +42,11 @@
         "category": "TailwindShades",
         "command": "tailwindshades.generateColorPalette",
         "title": "Generate custom color palette"
+      },
+      {
+        "category": "TailwindShades",
+        "command": "tailwindshades.generateColorPaletteCSSVars",
+        "title": "Generate custom color palette: CSS Variables"
       }
     ],
     "keybindings": [
