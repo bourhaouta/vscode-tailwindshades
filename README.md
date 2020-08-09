@@ -4,10 +4,9 @@
 
 **[Get it from the VS Code Marketplace →](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades)**
 
-<img src="https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/master/media/demo.gif" alt="HTML autocompletion" width="750">
+<img src="media/demo.gif" alt="HTML autocompletion" width="750">
 
--or-
-<img src="https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/master/media/demo-css-cars.gif" alt="How to use the shades plugin to generate CSS Variables" width="750">
+<img src="media/demo-css-vars.gif" alt="How to use the shades plugin to generate CSS Variables" width="750">
 
 ## Usage
 
