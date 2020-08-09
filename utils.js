@@ -43,8 +43,10 @@ function getPaletteString(colorName, palette, tabSize) {
  */
 function getPaletteStringCSSVars(colorName, palette, tabSize) {
   const paletteString = Object.entries(palette)
-    .map(([key, value]) => {
-      return `${' '.repeat(tabSize)}--${colorName}-${key}: ${value};`
+    .map(([key, value], index) => {
+      return `${
+        index === 0 ? '' : ' '.repeat(tabSize)
+      }--${colorName}-${key}: ${value};`
     })
     .join('\n')
 
