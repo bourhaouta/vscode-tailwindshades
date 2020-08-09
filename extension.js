@@ -101,19 +101,12 @@ const activate = (context) => {
     }
 
     const colorName = namer(selectedText, COLOR_MAP)
-    const workbenchConfig = vscode.workspace.getConfiguration('editor')
-    const selection = getSelection(editor)
-    const tabSize = selection.character + workbenchConfig.get('tabSize')
+    const tabSize = getSelection(editor).character
 
     const paletteString = getPaletteStringCSSVars(colorName, palette, tabSize)
 
     editor.edit((builder) => {
       builder.replace(editor.selection, paletteString)
-
-      editor.selection = new vscode.Selection(
-        selection.with(selection.line, selection.character),
-        selection.with(selection.line, selection.character + colorName.length),
-      )
     })
   }
 
