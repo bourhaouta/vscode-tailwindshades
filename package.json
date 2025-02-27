@@ -69,7 +69,8 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "culori": "^4.0.1",
     "hex-to-color-name": "^1.0.1",
-    "values.js": "^2.0.0"
+    "values.js": "^2.1.1"
   }
 }

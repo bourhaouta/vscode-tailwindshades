@@ -93,13 +93,18 @@ const activate = (context) => {
 
   function generateColorPaletteCSSVars() {
     const editor = vscode.window.activeTextEditor
-    const selectedText = editor.document.getText(editor.selection)
-    const palette = generatePalette(20, selectedText)
+    if (!editor) {
+      return vscode.window.showErrorMessage('No active editor!')
+    }
 
-    if (!editor || !palette) {
+    const selectedText = editor.document.getText(editor.selection)
+    const generator = new Values()
+
+    if (!generator.setColor(selectedText)) {
       return vscode.window.showErrorMessage('Please select a valid color!')
     }
 
+    const palette = generatePalette(20, selectedText)
     const colorName = namer(selectedText, COLOR_MAP)
     const tabSize = getSelection(editor).character
 
@@ -107,6 +112,8 @@ const activate = (context) => {
 
     editor.edit((builder) => {
       builder.replace(editor.selection, paletteString)
+    }).then(() => {
+      vscode.window.showInformationMessage('Generated CSS Variables Color Palette!')
     })
   }
 
@@ -119,9 +126,8 @@ const activate = (context) => {
     ),
   )
 }
-exports.activate = activate
 
-const deactivate = () => {}
+const deactivate = () => { }
 
 module.exports = {
   activate,

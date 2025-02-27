@@ -1,4 +1,19 @@
 const Values = require('values.js')
+const { formatCss, converter, parse } = require('culori')
+
+const hexToOklch = converter('oklch')
+
+/**
+ * Format OKLCH color ensuring no 'none' values
+ * @param {string} hexColor 
+ */
+function formatOklch(hexColor) {
+  const oklchColor = hexToOklch(hexColor)
+  // Ensure hue is always a number (default to 0 for achromatic colors)
+  oklchColor.h = oklchColor.h ?? 0
+  // Format with fixed precision
+  return `oklch(${oklchColor.l.toFixed(3)} ${oklchColor.c.toFixed(3)} ${oklchColor.h.toFixed(1)})`;
+}
 
 /**
  * @param {number} steps
@@ -16,7 +31,7 @@ function generatePalette(steps, color) {
     .reduce(
       (ac, c, index) => ({
         ...ac,
-        [(index + 1) * 100]: c.hexString(),
+        [(index + 1) * 100]: formatOklch(c.hexString()),
       }),
       {},
     )
@@ -44,9 +59,8 @@ function getPaletteString(colorName, palette, tabSize) {
 function getPaletteStringCSSVars(colorName, palette, tabSize) {
   const paletteString = Object.entries(palette)
     .map(([key, value], index) => {
-      return `${
-        index === 0 ? '' : ' '.repeat(tabSize)
-      }--${colorName}-${key}: ${value};`
+      return `${index === 0 ? '' : ' '.repeat(tabSize)
+        }--color-${colorName}-${key}: ${value};`
     })
     .join('\n')
 
