@@ -4,6 +4,7 @@
   "description": "Generate Tailwind CSS color palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
   "version": "1.0.0",
   "author": "Omar Bourhaouta <bourhaouta@gmail.com>",
+  "license": "MIT",
   "homepage": "https://github.com/bourhaouta/vscode-tailwindshades",
   "bugs": {
     "url": "https://github.com/bourhaouta/vscode-tailwindshades/issues",
@@ -117,7 +118,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check": "npm run typecheck && npm test",
-    "package": "vsce package --no-dependencies --skip-license",
+    "package": "vsce package --no-dependencies",
     "vscode:prepublish": "npm run build -- --production"
   },
   "devDependencies": {

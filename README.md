@@ -97,3 +97,7 @@ npm run build   # bundle to dist/
 ```
 
 Press <kbd>F5</kbd> in VS Code to try the extension in a new window. After upgrading a `tailwindcss` dev dependency, run `npm run palette` to refresh the reference palettes.
+
+## License
+
+[MIT](LICENSE) © Omar Bourhaouta
