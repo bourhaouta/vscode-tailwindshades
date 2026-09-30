@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { formatPalette, isInsideThemeBlock, isValidName, outputForLanguage } from '../src/format'
 import { generatePalette, parseColor } from '../src/palette'
-import { VERSIONS, versionFromPackageJson } from '../src/versions'
+import { VERSIONS, versionFromCss, versionFromPackageJson } from '../src/versions'
 
 const palette = generatePalette(parseColor('#3b82f6')!, VERSIONS[4].reference)
 const base = { name: 'brand', palette, colorFormat: 'hex' as const, indent: '  ', baseIndent: '' }
@@ -92,5 +92,31 @@ describe('versionFromPackageJson', () => {
     expect(versionFromPackageJson('{"dependencies":{"react":"^19.0.0"}}')).toBeUndefined()
     expect(versionFromPackageJson('{"dependencies":{"tailwindcss":"latest"}}')).toBeUndefined()
     expect(versionFromPackageJson('not json')).toBeUndefined()
+  })
+})
+
+describe('versionFromCss', () => {
+  it.each([
+    ['@import "tailwindcss";', 4],
+    ["@import 'tailwindcss/theme.css' layer(theme);", 4],
+    ['@theme {\n  --color-brand-500: red;\n}', 4],
+    ['@utility tab-4 {\n  tab-size: 4;\n}', 4],
+    ['@plugin "@tailwindcss/typography";', 4],
+    ['@custom-variant dark (&:where(.dark, .dark *));', 4],
+    ['@tailwind base;\n@tailwind components;\n@tailwind utilities;', 3],
+    ['@tailwind base;\n@variants hover {\n  .btn {}\n}', 2],
+    ['@responsive {\n  .box {}\n}', 2],
+  ])('reads %j', (css, version) => {
+    expect(versionFromCss(css)).toBe(version)
+  })
+
+  it('ignores CSS without Tailwind directives', () => {
+    expect(versionFromCss('.btn {\n  color: red;\n}')).toBeUndefined()
+    expect(versionFromCss('@import "./reset.css";\n@layer base {}')).toBeUndefined()
+  })
+
+  it('ignores directives in comments', () => {
+    expect(versionFromCss('/* @import "tailwindcss"; */\n@tailwind base;')).toBe(3)
+    expect(versionFromCss('/*\n@theme {\n}\n*/')).toBeUndefined()
   })
 })

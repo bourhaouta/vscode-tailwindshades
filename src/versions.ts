@@ -69,3 +69,23 @@ export function versionFromPackageJson(text: string): TailwindVersion | undefine
 
   return undefined
 }
+
+// Directives that only exist in Tailwind v4
+const V4_CSS = /@import\s+(?:url\()?["']tailwindcss(?:\/[^"']*)?["']|@theme\b|@utility\s|@plugin\s|@custom-variant\s|@source\s/
+// `@variants` and `@responsive` were removed in v3
+const V2_CSS = /@(?:variants|responsive)\b/
+// Tailwind v1 to v3 entry points
+const V3_CSS = /@tailwind\s+(?:base|components|utilities|screens|variants)\b/
+
+/**
+ * Guesses the Tailwind version from a CSS file's directives, e.g.
+ * `@import "tailwindcss"` or `@theme` -> 4, `@tailwind base` -> 3.
+ * Returns undefined when the file has no Tailwind directives.
+ */
+export function versionFromCss(text: string): TailwindVersion | undefined {
+  const css = text.replace(/\/\*[\s\S]*?\*\//g, '')
+  if (V4_CSS.test(css)) return 4
+  if (V2_CSS.test(css)) return 2
+  if (V3_CSS.test(css)) return 3
+  return undefined
+}

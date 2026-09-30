@@ -62,7 +62,14 @@ The palette follows Tailwind's own colors instead of simply mixing with white an
 
 ## Tailwind versions
 
-The version is read from the closest `package.json` (`tailwindcss` dependency). Without one, v4 is used.
+The version is detected from your project, most reliable source first:
+
+1. The closest `package.json` with a `tailwindcss` dependency
+2. The current CSS file: `@import "tailwindcss"`, `@theme`, `@utility`, `@plugin` → v4; `@tailwind base;` → v3
+3. A `tailwind.config.js` (or `.ts`, `.cjs`, `.mjs`) in the project → v3
+4. Other CSS files in the project, with the same hints as step 2
+
+If nothing is found, v4 is used. The status bar tells you which version was used and why, e.g. `v3 from tailwind.config.js`.
 
 | Version | Shades | In CSS files | In JS/TS files | Colors |
 | --- | --- | --- | --- | --- |

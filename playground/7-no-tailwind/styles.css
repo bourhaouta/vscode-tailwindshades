@@ -1,0 +1,4 @@
+/* Plain CSS, no Tailwind anywhere: falls back to v4 */
+:root {
+  hsl(200 80% 50%)
+}
