@@ -17,9 +17,13 @@ export type FormatOptions = {
 const CSS_LANGUAGES = ['css', 'scss', 'sass', 'less', 'postcss', 'tailwindcss', 'vue-postcss']
 const JS_LANGUAGES = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'json', 'jsonc']
 
+export function isCssLanguage(languageId: string): boolean {
+  return CSS_LANGUAGES.includes(languageId)
+}
+
 /** Picks the output for a file type, or undefined when the user should choose */
 export function outputForLanguage(languageId: string, profile: VersionProfile): Output | undefined {
-  if (CSS_LANGUAGES.includes(languageId)) return profile.cssOutput
+  if (isCssLanguage(languageId)) return profile.cssOutput
   if (JS_LANGUAGES.includes(languageId)) return 'config'
   return undefined
 }

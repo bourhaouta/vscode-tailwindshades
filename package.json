@@ -70,7 +70,7 @@
           "type": "string",
           "enum": ["auto", "4", "3", "2", "1"],
           "enumDescriptions": [
-            "Read the tailwindcss version from the closest package.json (falls back to v4)",
+            "Detect from package.json, CSS directives (@import \"tailwindcss\", @tailwind base) or tailwind.config.* (falls back to v4)",
             "Shades 50–950, @theme block in CSS, OKLCH colors",
             "Shades 50–950, tailwind.config.js object, hex colors",
             "Shades 50–900, tailwind.config.js object, hex colors",
