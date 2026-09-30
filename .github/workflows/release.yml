@@ -1,16 +1,27 @@
-# Publishes to the VS Code Marketplace and Open VSX when a version tag is pushed:
+# Runs when a version tag is pushed:
 #   git tag v1.0.0 && git push origin v1.0.0
-# Needs two repository secrets: VSCE_PAT (Azure DevOps token with Marketplace > Manage)
-# and OVSX_PAT (open-vsx.org access token).
+#
+# 1. Creates a GitHub Release with the .vsix attached (notes from CHANGELOG.md).
+#    Upload that file at https://marketplace.visualstudio.com/manage (⋯ > Update)
+#    to publish on the VS Code Marketplace by hand.
+# 2. Publishes to Open VSX when the OVSX_PAT secret is set (open-vsx.org token).
+# 3. Publishes to the VS Code Marketplace when the VSCE_PAT secret is set
+#    (Azure DevOps token with Marketplace > Manage). Skipped otherwise.
 name: Release
 
 on:
   push:
     tags: ['v*']
 
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,12 +36,19 @@ jobs:
 
       - run: npm run package
 
-      - name: Publish to VS Code Marketplace
-        run: npx vsce publish --packagePath *.vsix
+      - name: Create GitHub Release
         env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # This version's section of CHANGELOG.md, without its heading
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="## $version" '$0 == v {found=1; next} /^## / && found {exit} found' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" *.vsix --title "$GITHUB_REF_NAME" --notes-file notes.md
 
       - name: Publish to Open VSX
+        if: env.OVSX_PAT != ''
         run: npx ovsx publish *.vsix
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Publish to VS Code Marketplace
+        if: env.VSCE_PAT != ''
+        run: npx vsce publish --packagePath *.vsix
