@@ -1,0 +1,9 @@
+@tailwind base;
+
+@variants hover {
+  .btn {}
+}
+
+:root {
+  #ec4899
+}

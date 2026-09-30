@@ -1,0 +1,12 @@
+{
+  // Each case is its own workspace folder, so detection in one case can't see the others
+  "folders": [
+    { "path": "1-v4-package-json" },
+    { "path": "2-v3-package-json" },
+    { "path": "3-v4-css-only" },
+    { "path": "4-v3-css-only" },
+    { "path": "5-v3-config-file" },
+    { "path": "6-v2-css" },
+    { "path": "7-no-tailwind" }
+  ]
+}

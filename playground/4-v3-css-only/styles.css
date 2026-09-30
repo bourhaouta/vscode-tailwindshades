@@ -1,0 +1,8 @@
+/* No package.json: detected from @tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  rgb(139 92 246)
+}

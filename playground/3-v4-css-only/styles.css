@@ -1,0 +1,6 @@
+/* No package.json: detected from the @theme directive */
+@import "tailwindcss";
+
+@theme {
+  oklch(70% 0.15 160)
+}
