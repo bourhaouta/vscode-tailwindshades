@@ -4,7 +4,9 @@
 # 1. Creates a GitHub Release with the .vsix attached (notes from CHANGELOG.md).
 #    Upload that file at https://marketplace.visualstudio.com/manage (⋯ > Update)
 #    to publish on the VS Code Marketplace by hand.
-# 2. Publishes to Open VSX when the OVSX_PAT secret is set (open-vsx.org token).
+# 2. Publishes to Open VSX with trusted publishing (OIDC), so no token is stored.
+#    This repo and workflow file are registered under the bourhaouta namespace's
+#    Trusted Publishers at https://open-vsx.org/user-settings/namespaces
 # 3. Publishes to the VS Code Marketplace when the VSCE_PAT secret is set
 #    (Azure DevOps token with Marketplace > Manage). Skipped otherwise.
 name: Release
@@ -15,13 +17,14 @@ on:
 
 permissions:
   contents: write
+  # Lets ovsx get an OIDC token for Open VSX trusted publishing
+  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     env:
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      OVSX_PAT: ${{ secrets.OVSX_PAT }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -46,8 +49,7 @@ jobs:
           gh release create "$GITHUB_REF_NAME" *.vsix --title "$GITHUB_REF_NAME" --notes-file notes.md
 
       - name: Publish to Open VSX
-        if: env.OVSX_PAT != ''
-        run: npx ovsx publish *.vsix
+        run: npx ovsx publish *.vsix --trusted-publishing
 
       - name: Publish to VS Code Marketplace
         if: env.VSCE_PAT != ''
