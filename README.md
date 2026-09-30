@@ -4,6 +4,8 @@ Generate a full [Tailwind CSS](https://tailwindcss.com/) color palette (`50` to 
 
 **[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades)** · **[Open VSX](https://open-vsx.org/extension/bourhaouta/tailwindshades)** (Cursor, Windsurf, VSCodium)
 
+<img src="media/demo.gif" alt="Put the cursor on #db4d53, press Ctrl+K Ctrl+G, name it brand, and a Tailwind v4 @theme palette from brand-50 to brand-950 is written in OKLCH" width="750">
+
 ## Usage
 
 1. Select a color, or just put the cursor on it: `#db4d53`, `rgb(…)`, `hsl(…)`, `oklch(…)` or a CSS color name.
