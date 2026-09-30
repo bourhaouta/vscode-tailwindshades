@@ -1,9 +1,10 @@
 {
   "name": "tailwindshades",
   "displayName": "Tailwind Shades",
-  "description": "Tailwind CSS color palette generator",
-  "version": "0.0.5",
-  "author": "Omar Bourhaouta<bourhaouta@gmail.com>",
+  "description": "Generate Tailwind CSS color palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
+  "version": "1.0.0",
+  "author": "Omar Bourhaouta <bourhaouta@gmail.com>",
+  "license": "MIT",
   "homepage": "https://github.com/bourhaouta/vscode-tailwindshades",
   "bugs": {
     "url": "https://github.com/bourhaouta/vscode-tailwindshades/issues",
@@ -17,36 +18,41 @@
   "keywords": [
     "tailwind",
     "tailwindcss",
+    "tailwind v4",
     "css",
     "color",
-    "palette"
+    "palette",
+    "shades",
+    "oklch",
+    "theme"
   ],
   "galleryBanner": {
     "color": "#f1f5f8"
   },
   "icon": "media/icon.png",
   "engines": {
-    "vscode": "^1.32.0"
+    "vscode": "^1.85.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:tailwindshades.generateColorPalette",
-    "onCommand:tailwindshades.generateColorPaletteCSSVars"
-  ],
-  "main": "./extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "category": "TailwindShades",
+        "category": "Tailwind Shades",
         "command": "tailwindshades.generateColorPalette",
-        "title": "Generate custom color palette"
+        "title": "Generate color palette"
       },
       {
-        "category": "TailwindShades",
+        "category": "Tailwind Shades",
+        "command": "tailwindshades.generateColorPaletteAs",
+        "title": "Generate color palette (choose version and output)…"
+      },
+      {
+        "category": "Tailwind Shades",
         "command": "tailwindshades.generateColorPaletteCSSVars",
-        "title": "Generate custom color palette: CSS Variables"
+        "title": "Generate color palette as CSS variables"
       }
     ],
     "keybindings": [
@@ -56,20 +62,77 @@
         "mac": "cmd+k cmd+g",
         "when": "editorTextFocus"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Tailwind Shades",
+      "properties": {
+        "tailwindshades.tailwindVersion": {
+          "type": "string",
+          "enum": ["auto", "4", "3", "2", "1"],
+          "enumDescriptions": [
+            "Read the tailwindcss version from the closest package.json (falls back to v4)",
+            "Shades 50–950, @theme block in CSS, OKLCH colors",
+            "Shades 50–950, tailwind.config.js object, hex colors",
+            "Shades 50–900, tailwind.config.js object, hex colors",
+            "Shades 100–900, tailwind.config.js object, hex colors"
+          ],
+          "default": "auto",
+          "description": "Tailwind CSS version the palette is made for."
+        },
+        "tailwindshades.colorFormat": {
+          "type": "string",
+          "enum": ["auto", "oklch", "hex", "rgb"],
+          "enumDescriptions": [
+            "OKLCH for Tailwind v4, hex for older versions",
+            "oklch(62.3% 0.214 259.815)",
+            "#3b82f6",
+            "rgb(59, 130, 246)"
+          ],
+          "default": "auto",
+          "description": "Color format of the generated shades."
+        },
+        "tailwindshades.output": {
+          "type": "string",
+          "enum": ["auto", "theme", "config", "cssVariables"],
+          "enumDescriptions": [
+            "Pick from the file type: CSS files get @theme (v4) or CSS variables, JS/TS files get a config object",
+            "Tailwind v4 @theme block: --color-brand-500: …;",
+            "tailwind.config.js object: brand: { 500: '…' }",
+            "Plain CSS variables: --brand-500: …;"
+          ],
+          "default": "auto",
+          "description": "What the extension writes in place of the selected color."
+        },
+        "tailwindshades.promptForName": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for the color name (the closest Tailwind color name is suggested)."
+        }
+      }
+    }
   },
   "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint"
+    "palette": "node scripts/extract-palette.mjs",
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test",
+    "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build -- --production"
   },
   "devDependencies": {
-    "@types/node": "^13.11.0",
-    "@types/vscode": "^1.32.0",
-    "eslint": "^6.8.0",
-    "typescript": "^3.8.3"
-  },
-  "dependencies": {
-    "hex-to-color-name": "^1.0.1",
-    "values.js": "^2.0.0"
+    "@types/culori": "^4.0.1",
+    "@types/node": "^22.20.4",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^4.0.0",
+    "culori": "^4.0.2",
+    "esbuild": "^0.28.2",
+    "ovsx": "^1.2.0",
+    "tailwindcss": "^4.3.3",
+    "tailwindcss-v1": "npm:tailwindcss@^1.9.6",
+    "tailwindcss-v3": "npm:tailwindcss@^3.4.19",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
   }
 }
