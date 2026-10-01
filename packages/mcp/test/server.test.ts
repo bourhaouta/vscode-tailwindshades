@@ -58,6 +58,9 @@ describe('tailwindshades-mcp', () => {
 
       const builtIn = await call('generate_palette', { color: '#db4d53', name: 'constructor' })
       expect(builtIn.structuredContent).toMatchObject({ replacesTailwindColor: false })
+
+      const css = await call('generate_palette', { color: '#db4d53', output: 'css' })
+      expect(css.structuredContent).toMatchObject({ name: 'red', replacesTailwindColor: false })
     })
 
     it('keeps the input color exactly at its shade', async () => {

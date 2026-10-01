@@ -103,7 +103,7 @@ export function createServer(): McpServer {
         shades: z.array(z.object({ shade: z.number(), value: z.string() })),
         replacesTailwindColor: z
           .boolean()
-          .describe("True when the name is a default Tailwind color, so the code replaces Tailwind's palette"),
+          .describe("True when the code replaces a default Tailwind palette (default color name, theme or config output)"),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },

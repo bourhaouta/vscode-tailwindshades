@@ -31,6 +31,9 @@ describe('createPalette', () => {
     expect(createPalette({ color: '#3b82f6' })).toMatchObject({ name: 'blue', replacesTailwindColor: true })
     expect(createPalette({ color: '#3b82f6', name: 'brand' }).replacesTailwindColor).toBe(false)
     expect(createPalette({ color: '#3b82f6', name: 'constructor' }).replacesTailwindColor).toBe(false)
+    // Plain CSS variables (--blue-500) are not read by Tailwind
+    expect(createPalette({ color: '#3b82f6', output: 'cssVariables' }).replacesTailwindColor).toBe(false)
+    expect(createPalette({ color: '#3b82f6', version: 3 }).replacesTailwindColor).toBe(true)
   })
 
   it('uses hex and a config object for older versions', () => {
@@ -63,6 +66,7 @@ describe('runCli', () => {
   it('notes when the name replaces a default Tailwind color', () => {
     expect(runCli(['#db4d53']).stderr).toContain("Note: this replaces Tailwind's own red palette")
     expect(runCli(['#db4d53', '-n', 'brand']).stderr).not.toContain('Note')
+    expect(runCli(['#db4d53', '-o', 'css']).stderr).not.toContain('Note')
   })
 
   it('accepts hex without #', () => {

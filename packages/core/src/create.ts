@@ -30,7 +30,10 @@ export type CreateResult = {
   family: string
   /** Each shade's color in `format`, lightest first */
   shades: { shade: number; value: string }[]
-  /** True when `name` is a default Tailwind color, so the code replaces Tailwind's palette */
+  /**
+   * True when the code replaces one of Tailwind's default palettes: `name` is a
+   * default Tailwind color and the output is one Tailwind reads (not plain CSS variables)
+   */
   replacesTailwindColor: boolean
   palette: Palette
 }
@@ -79,7 +82,7 @@ export function createPalette(options: CreateOptions): CreateResult {
     anchor: palette.anchor,
     family: palette.family,
     shades: palette.shades.map(({ shade, color }) => ({ shade, value: formatColor(color, format) })),
-    replacesTailwindColor: Object.hasOwn(profile.reference.colors, name),
+    replacesTailwindColor: output !== 'cssVariables' && Object.hasOwn(profile.reference.colors, name),
     palette,
   }
 }
