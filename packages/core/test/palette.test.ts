@@ -75,6 +75,20 @@ describe('generatePalette', () => {
     expect(formatColor(kept, 'hex')).toBe(hex)
   })
 
+  it.each(['#98a196', '#7a6f67', '#6a737c', '#8a8f7e', '#7d7a85'])(
+    'keeps the shades of the tinted gray %s close to its hue',
+    (hex) => {
+      const input = parseColor(hex)!
+      const palette = generatePalette(input, VERSIONS[4].reference)
+      for (const { color } of palette.shades) {
+        // Very low chroma has no visible hue
+        if (color.c < 0.005) continue
+        const gap = Math.abs(((color.h! - input.h! + 540) % 360) - 180)
+        expect(gap).toBeLessThan(45)
+      }
+    },
+  )
+
   it('puts a color at the shade with the closest lightness, not the closest chroma', () => {
     // Close to red-500 in lightness, but less colorful (closer to red-400 in chroma)
     expect(generatePalette(parseColor('#db4d53')!, VERSIONS[4].reference).anchor).toBe(500)

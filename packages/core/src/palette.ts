@@ -116,8 +116,17 @@ export function generatePalette(color: Color, reference: ReferencePalette): Pale
 
     const chroma = chromaScale === undefined ? color.c * (1 - fade) : c * chromaScale
 
-    // Keep the input hue, plus Tailwind's small hue drift between shades
-    const hue = isGray(color) ? h : (color.h! + hueDifference(refH, h) + 360) % 360
+    // Colors keep their hue, plus Tailwind's small hue drift between shades.
+    // Grays take the tint of the matched Tailwind gray, unless it has none
+    // (neutral): then its hue is only a placeholder, so they keep their own.
+    const hue =
+      color.h === undefined
+        ? h
+        : !isGray(color)
+          ? (color.h + hueDifference(refH, h) + 360) % 360
+          : chromaScale === undefined
+            ? color.h
+            : h
 
     return {
       shade,
