@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+
+/* Brand colors from bourhaouta.com */
+@theme {
+  --color-primary-100: #f8dbdd;
+  --color-primary-200: #f1b8ba;
+  --color-primary-300: #e99498;
+  --color-primary-400: #e27175;
+  --color-primary-500: #db4d53;
+  --color-primary-600: #af3e42;
+  --color-primary-700: #832e32;
+  --color-primary-800: #581f21;
+
+  --color-secondary-100: #cddadd;
+  --color-secondary-200: #9bb4ba;
+  --color-secondary-300: #6a8f98;
+  --color-secondary-400: #386975;
+  --color-secondary-500: #064453;
+  --color-secondary-600: #053642;
+  --color-secondary-700: #042932;
+  --color-secondary-800: #021b21;
+  --color-secondary-900: #010e11;
+}
+
+/* Semantic colors: components use these names, so light and dark mode only change here */
+@theme inline {
+  --font-sans: var(--font-rubik), system-ui, sans-serif;
+
+  --color-page: var(--page);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-field: var(--field);
+  --color-accent: var(--accent);
+  --color-code: var(--code);
+}
+
+:root {
+  color-scheme: light dark;
+
+  --page: #fff;
+  --ink: var(--color-secondary-500);
+  --muted: var(--color-secondary-400);
+  --surface: #edf2f7;
+  --line: #e2e8f0;
+  --field: #fff;
+  --accent: var(--color-primary-600);
+  --code: var(--color-secondary-800);
+  --shadow: var(--color-secondary-100);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: var(--color-secondary-800);
+    --ink: var(--color-secondary-100);
+    --muted: var(--color-secondary-200);
+    --surface: var(--color-secondary-700);
+    --line: var(--color-secondary-600);
+    --field: var(--color-secondary-900);
+    --accent: var(--color-primary-400);
+    --code: var(--color-secondary-900);
+    --shadow: var(--color-secondary-600);
+  }
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+
+  body {
+    background-color: var(--page);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility site-container {
+  @apply mx-auto w-full px-4;
+  max-width: 768px;
+}
+
+/* The current palette's color (set by the generator), readable on light and dark pages */
+@utility text-brand {
+  color: var(--brand-500, #38b2ac);
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--brand-400, #4fd1c5);
+  }
+}
+
+/* The offset "shadow card" from bourhaouta.com: a solid card behind the content */
+@utility shadow-card {
+  box-shadow: 7px 7px 0 var(--shadow);
+}

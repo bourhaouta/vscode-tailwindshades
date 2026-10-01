@@ -3,3 +3,6 @@ dist
 .vscode-test/
 *.vsix
 .DS_Store
+.next
+next-env.d.ts
+*.tsbuildinfo

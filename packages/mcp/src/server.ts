@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import { McpServer } from '@modelcontextprotocol/server'
 import {
   closestTailwindShade,
@@ -11,7 +10,10 @@ import {
 } from 'tailwindshades-cli'
 import * as z from 'zod'
 
-const { version } = createRequire(import.meta.url)('../package.json')
+// Set from package.json by scripts/build.mjs, so the server also works when
+// bundled into another app (like the website's /mcp route)
+declare const __VERSION__: string
+const version = __VERSION__
 
 const OUTPUTS: Record<'theme' | 'config' | 'css', Output> = {
   theme: 'theme',

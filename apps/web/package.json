@@ -1,0 +1,27 @@
+{
+  "name": "tailwindshades-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deps": "npm run build -w tailwindshades-cli -w tailwindshades-mcp",
+    "dev": "npm run deps && next dev",
+    "build": "npm run deps && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.2.0",
+    "@vercel/analytics": "^2.0.1",
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwindshades-cli": "^1.1.0",
+    "tailwindshades-mcp": "^1.1.0"
+  }
+}
