@@ -2,8 +2,15 @@ import Generator from '@/components/Generator'
 import SetupTabs from '@/components/SetupTabs'
 import { site } from '@/lib/site'
 
-// Shades of #db4d53, for the little logo
-const logo = ['#f4cbcd', '#e57278', '#db4d53', '#a92e31', '#74292b']
+// The logo shows the current palette (set by the generator); these shades of
+// #db4d53 are the defaults until it runs
+const logo = [
+  'var(--brand-200, #f4cbcd)',
+  'var(--brand-400, #e57278)',
+  'var(--brand-500, #db4d53)',
+  'var(--brand-700, #a92e31)',
+  'var(--brand-900, #74292b)',
+]
 
 export default function Home() {
   return (
@@ -12,7 +19,7 @@ export default function Home() {
         <a href="/" className="flex items-center gap-2 font-semibold">
           <span aria-hidden className="flex h-5 overflow-hidden rounded-sm">
             {logo.map((color) => (
-              <span key={color} className="w-1.5" style={{ backgroundColor: color }} />
+              <span key={color} className="w-1.5 transition-colors duration-300" style={{ backgroundColor: color }} />
             ))}
           </span>
           {site.name}
@@ -20,6 +27,9 @@ export default function Home() {
         <nav className="flex gap-4 text-sm text-muted">
           <a className="hover:text-ink" href={site.marketplace}>
             VS Code
+          </a>
+          <a className="hover:text-ink" href={site.openVsx}>
+            Open VSX
           </a>
           <a className="hover:text-ink" href={site.github}>
             GitHub
@@ -30,7 +40,7 @@ export default function Home() {
       <main className="site-container pb-16">
         <section className="pt-6 pb-8 sm:pt-12">
           <h1 className="max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">
-            Tailwind palettes from <span className="text-primary-500">any color</span>
+            Tailwind palettes from <span className="text-brand transition-colors duration-300">any color</span>
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
             Your color stays exactly as it is. The other shades follow Tailwind&apos;s own colors, computed in OKLCH,

@@ -96,6 +96,15 @@
   max-width: 960px;
 }
 
+/* The current palette's color (set by the generator), readable on light and dark pages */
+@utility text-brand {
+  color: var(--brand-500, var(--color-primary-500));
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--brand-400, var(--color-primary-400));
+  }
+}
+
 /* The offset "shadow card" from bourhaouta.com: a solid card behind the content */
 @utility shadow-card {
   box-shadow: 7px 7px 0 var(--shadow);
