@@ -15,7 +15,7 @@ describe('release metadata', () => {
   })
 
   it('depends on the core version it is released with', () => {
-    expect(mcp.dependencies.tailwindshades).toBe(`^${root.version}`)
+    expect(mcp.dependencies['tailwindshades-cli']).toBe(`^${root.version}`)
   })
 
   it('links the npm package and the MCP Registry entry', () => {

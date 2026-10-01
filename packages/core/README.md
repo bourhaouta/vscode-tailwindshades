@@ -1,4 +1,4 @@
-# tailwindshades
+# tailwindshades-cli
 
 Generate a full [Tailwind CSS](https://tailwindcss.com/) color palette (`50` to `950`) from any color. Works with **Tailwind v4, v3, v2 and v1**.
 
@@ -7,7 +7,7 @@ The engine behind the [Tailwind Shades](https://marketplace.visualstudio.com/ite
 ## Command line
 
 ```sh
-npx tailwindshades "#db4d53" --name brand
+npx tailwindshades-cli "#db4d53" --name brand
 ```
 
 ```css
@@ -44,7 +44,7 @@ Any CSS color works: `#db4d53`, `db4d53` (no `#` needed, since `#` starts a comm
 The palette goes to stdout and a short summary to stderr, so you can add it to a file:
 
 ```sh
-npx tailwindshades db4d53 -t 3 -o config >> colors.js
+npx tailwindshades-cli db4d53 -t 3 -o config >> colors.js
 ```
 
 Without `--name`, the palette uses the closest Tailwind color's name (like `red`), which replaces Tailwind's own palette. The CLI prints a note when that happens.
@@ -52,11 +52,11 @@ Without `--name`, the palette uses the closest Tailwind color's name (like `red`
 ## Library
 
 ```sh
-npm install tailwindshades
+npm install tailwindshades-cli
 ```
 
 ```js
-import { createPalette } from 'tailwindshades'
+import { createPalette } from 'tailwindshades-cli'
 
 const palette = createPalette({ color: '#db4d53', name: 'brand', version: 4 })
 

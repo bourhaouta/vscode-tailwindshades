@@ -14,7 +14,7 @@ import {
   type ColorFormat,
   type Output,
   type TailwindVersion,
-} from 'tailwindshades'
+} from 'tailwindshades-cli'
 
 // A CSS color under the cursor: hex or a color function like rgb(), hsl(), oklch()
 const COLOR_AT_CURSOR =
