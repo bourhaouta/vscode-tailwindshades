@@ -17,9 +17,9 @@ Options:
   -v, --version            Show the version
 
 Examples:
-  npx tailwindshades "#db4d53" --name brand
-  npx tailwindshades "oklch(62% 0.2 250)" -t 3 -o config
-  npx tailwindshades db4d53 -o css >> colors.css
+  npx tailwindshades-cli "#db4d53" --name brand
+  npx tailwindshades-cli "oklch(62% 0.2 250)" -t 3 -o config
+  npx tailwindshades-cli db4d53 -o css >> colors.css
 `
 
 const VERSIONS = ['4', '3', '2', '1']

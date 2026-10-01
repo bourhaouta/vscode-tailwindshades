@@ -1,5 +1,5 @@
 {
-  "name": "tailwindshades",
+  "name": "tailwindshades-cli",
   "version": "1.1.0",
   "description": "Generate Tailwind CSS color palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
   "author": "Omar Bourhaouta <bourhaouta@gmail.com>",

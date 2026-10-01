@@ -60,7 +60,7 @@ The Tailwind shade that looks most like a color, e.g. `#db4d53` → `red-500`, w
 
 ## More
 
-- [tailwindshades](https://www.npmjs.com/package/tailwindshades): the same palettes from the command line
+- [tailwindshades-cli](https://www.npmjs.com/package/tailwindshades-cli): the same palettes from the command line
 - [Source and issues](https://github.com/bourhaouta/vscode-tailwindshades)
 
 ## License

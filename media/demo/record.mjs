@@ -13,7 +13,7 @@ import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createPalette, formatColor } from 'tailwindshades'
+import { createPalette, formatColor } from 'tailwindshades-cli'
 
 const dir = path.dirname(fileURLToPath(import.meta.url))
 const out = path.join(dir, '..', 'demo.gif')

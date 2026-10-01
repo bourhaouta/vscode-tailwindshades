@@ -104,7 +104,7 @@ Each version uses its own default palette as the reference, so a v1 palette look
 The same palettes, without an editor:
 
 ```sh
-npx tailwindshades "#db4d53" --name brand
+npx tailwindshades-cli "#db4d53" --name brand
 ```
 
 | Option | Values | Default |
@@ -114,7 +114,7 @@ npx tailwindshades "#db4d53" --name brand
 | `-f, --format` | `oklch`, `hex`, `rgb` | `oklch` for v4, `hex` before |
 | `-o, --output` | `theme`, `config`, `css` | `theme` for v4, `config` before |
 
-The palette goes to stdout, so you can add it to a file: `npx tailwindshades db4d53 -o css >> colors.css`. More in the [package README](packages/core#readme).
+The palette goes to stdout, so you can add it to a file: `npx tailwindshades-cli db4d53 -o css >> colors.css`. More in the [package README](packages/core#readme).
 
 ## Use it with AI agents
 

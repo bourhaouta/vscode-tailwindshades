@@ -43,7 +43,7 @@
   "dependencies": {
     "@modelcontextprotocol/server": "^2.2.0",
     "zod": "^4.6.5",
-    "tailwindshades": "^1.1.0"
+    "tailwindshades-cli": "^1.1.0"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.2.0"

@@ -9,7 +9,7 @@
 #    Trusted Publishers at https://open-vsx.org/user-settings/namespaces
 # 3. Publishes to the VS Code Marketplace when the VSCE_PAT secret is set
 #    (Azure DevOps token with Marketplace > Manage). Skipped otherwise.
-# 4. Publishes the npm packages tailwindshades and tailwindshades-mcp with
+# 4. Publishes the npm packages tailwindshades-cli and tailwindshades-mcp with
 #    trusted publishing (OIDC, with provenance). Each package lists this repo
 #    and release.yml as its trusted publisher on npmjs.com (package Settings).
 #    A version that is already on npm is skipped, so the step can be re-run.

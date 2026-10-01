@@ -8,7 +8,7 @@ import {
   VERSIONS,
   type Output,
   type TailwindVersion,
-} from 'tailwindshades'
+} from 'tailwindshades-cli'
 import * as z from 'zod'
 
 const { version } = createRequire(import.meta.url)('../package.json')

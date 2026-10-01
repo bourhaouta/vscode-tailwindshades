@@ -126,7 +126,7 @@
     "packages/*"
   ],
   "devDependencies": {
-    "tailwindshades": "*",
+    "tailwindshades-cli": "*",
     "@types/node": "^22.20.4",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^4.0.0",
