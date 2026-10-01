@@ -1,20 +1,20 @@
 import * as vscode from 'vscode'
 import {
   formatPalette,
+  generatePalette,
   isCssLanguage,
   isInsideThemeBlock,
   isValidName,
-  outputForLanguage,
-} from './format'
-import { generatePalette, parseColor, type ColorFormat } from './palette'
-import {
   LATEST_VERSION,
+  outputForLanguage,
+  parseColor,
   VERSIONS,
   versionFromCss,
   versionFromPackageJson,
+  type ColorFormat,
   type Output,
   type TailwindVersion,
-} from './versions'
+} from 'tailwindshades'
 
 // A CSS color under the cursor: hex or a color function like rgb(), hsl(), oklch()
 const COLOR_AT_CURSOR =

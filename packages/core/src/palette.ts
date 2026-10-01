@@ -1,9 +1,9 @@
 import { converter, formatHex, formatRgb, parse, toGamut } from 'culori'
-import type { Oklch, ReferencePalette } from './tailwind-palette'
+import type { Oklch, ReferencePalette } from './tailwind-palette.js'
 
 export type ColorFormat = 'oklch' | 'hex' | 'rgb'
 
-/** OKLCH color: lightness 0-1, chroma 0-~0.4, hue in degrees (undefined = no hue, e.g. gray) */
+/** OKLCH color: lightness 0-1, chroma 0-~0.4, hue in degrees (undefined = no hue, e.g. pure gray) */
 export type Color = { l: number; c: number; h: number | undefined }
 
 export type Palette = {
@@ -15,9 +15,6 @@ export type Palette = {
   shades: { shade: number; color: Color }[]
 }
 
-// Below this chroma a color is treated as gray (its hue is not meaningful)
-const GRAY_CHROMA = 0.02
-
 const toOklch = converter('oklch')
 
 /** Parses any CSS color (hex, rgb(), hsl(), oklch(), named colors, ...) */
@@ -25,38 +22,47 @@ export function parseColor(input: string): Color | undefined {
   const parsed = parse(input.trim())
   if (!parsed) return undefined
 
+  // Keep the hue even for grays: a warm gray must match stone, not zinc, and
+  // must stay exactly as it is at its shade
   const { l, c = 0, h } = toOklch(parsed)
-  return { l, c, h: c < GRAY_CHROMA || h === undefined ? undefined : h }
+  return { l, c, h }
 }
 
 function hueDifference(from: number, to: number): number {
   return ((((to - from) % 360) + 540) % 360) - 180
 }
 
-// Euclidean distance in OKLab; lightness counts half so the hue picks the family
-function distance(color: Color, [l, c, h]: Oklch): number {
-  const hue = ((color.h ?? h) * Math.PI) / 180
+// Euclidean distance in OKLab, with lightness scaled by `lightnessWeight`
+function distance(color: Color, [l, c, h]: Oklch, lightnessWeight: number): number {
+  // No hue means no chroma, so any hue gives the same distance
+  const hue = ((color.h ?? 0) * Math.PI) / 180
   const refHue = (h * Math.PI) / 180
   const da = color.c * Math.cos(hue) - c * Math.cos(refHue)
   const db = color.c * Math.sin(hue) - c * Math.sin(refHue)
-  return Math.hypot((color.l - l) * 0.5, da, db)
+  return Math.hypot((color.l - l) * lightnessWeight, da, db)
 }
 
-/** Finds the Tailwind color and shade index that look most like `color` */
+/**
+ * Finds the Tailwind color and shade index that look most like `color`.
+ * By default lightness counts half, so the hue picks the family: that's the
+ * best curve for a palette. Use `lightnessWeight: 1` for the plain OKLab
+ * distance, to find the shade that looks the same.
+ */
 export function closestTailwindShade(
   color: Color,
   reference: ReferencePalette,
-): { family: string; index: number } {
-  let best = { family: '', index: 0, score: Infinity }
+  { lightnessWeight = 0.5 } = {},
+): { family: string; index: number; distance: number } {
+  let best = { family: '', index: 0, distance: Infinity }
 
   for (const [family, shades] of Object.entries(reference.colors)) {
     shades.forEach((shade, index) => {
-      const score = distance(color, shade)
-      if (score < best.score) best = { family, index, score }
+      const score = distance(color, shade, lightnessWeight)
+      if (score < best.distance) best = { family, index, distance: score }
     })
   }
 
-  return { family: best.family, index: best.index }
+  return best
 }
 
 /**
@@ -65,8 +71,15 @@ export function closestTailwindShade(
  * at its closest shade.
  */
 export function generatePalette(color: Color, reference: ReferencePalette): Palette {
-  const { family, index: anchor } = closestTailwindShade(color, reference)
+  // The family comes from the default match (hue first). Inside it, the shade
+  // that looks the same keeps the lightness shift, and so the curve's bend, small.
+  const { family } = closestTailwindShade(color, reference)
   const curve = reference.colors[family]
+  const { index: anchor } = closestTailwindShade(
+    color,
+    { shades: reference.shades, colors: { [family]: curve } },
+    { lightnessWeight: 1 },
+  )
   const [refL, refC, refH] = curve[anchor]
   const last = curve.length - 1
 

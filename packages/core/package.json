@@ -1,0 +1,59 @@
+{
+  "name": "tailwindshades",
+  "version": "1.1.0",
+  "description": "Generate Tailwind CSS color palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
+  "author": "Omar Bourhaouta <bourhaouta@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/bourhaouta/vscode-tailwindshades/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/bourhaouta/vscode-tailwindshades/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bourhaouta/vscode-tailwindshades.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "tailwind",
+    "tailwindcss",
+    "color",
+    "palette",
+    "shades",
+    "oklch",
+    "cli",
+    "tailwind v4",
+    "theme"
+  ],
+  "type": "module",
+  "bin": {
+    "tailwindshades": "dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "tailwindshades-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "palette": "node scripts/extract-palette.mjs",
+    "build": "node scripts/build.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "culori": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/culori": "^4.0.1",
+    "tailwindcss": "^4.3.3",
+    "tailwindcss-v1": "npm:tailwindcss@^1.9.6",
+    "tailwindcss-v3": "npm:tailwindcss@^3.4.19"
+  }
+}

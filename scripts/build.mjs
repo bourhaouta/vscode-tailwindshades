@@ -1,4 +1,4 @@
-// Bundles src/extension.ts (and culori) into dist/extension.js.
+// Bundles src/extension.ts (with the core package and culori) into dist/extension.js.
 // Usage: node scripts/build.mjs [--production] [--watch]
 import * as esbuild from 'esbuild'
 
@@ -11,6 +11,8 @@ const context = await esbuild.context({
   outfile: 'dist/extension.js',
   // `vscode` is provided by the editor at runtime
   external: ['vscode'],
+  // Use the core package's TypeScript source, so it doesn't need a build first
+  conditions: ['tailwindshades-source'],
   format: 'cjs',
   platform: 'node',
   target: 'node18',

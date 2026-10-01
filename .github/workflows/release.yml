@@ -9,6 +9,14 @@
 #    Trusted Publishers at https://open-vsx.org/user-settings/namespaces
 # 3. Publishes to the VS Code Marketplace when the VSCE_PAT secret is set
 #    (Azure DevOps token with Marketplace > Manage). Skipped otherwise.
+# 4. Publishes the npm packages tailwindshades and tailwindshades-mcp with
+#    trusted publishing (OIDC, with provenance). Each package lists this repo
+#    and release.yml as its trusted publisher on npmjs.com (package Settings).
+#    A version that is already on npm is skipped, so the step can be re-run.
+# 5. Publishes packages/mcp/server.json to the MCP Registry, logged in with
+#    GitHub OIDC (io.github.bourhaouta/* names need no other secret).
+#
+# The extension and both packages share one version (a test checks it).
 name: Release
 
 on:
@@ -17,7 +25,7 @@ on:
 
 permissions:
   contents: write
-  # Lets ovsx get an OIDC token for Open VSX trusted publishing
+  # OIDC tokens for Open VSX, npm and the MCP Registry
   id-token: write
 
 jobs:
@@ -54,3 +62,25 @@ jobs:
       - name: Publish to VS Code Marketplace
         if: env.VSCE_PAT != ''
         run: npx vsce publish --packagePath *.vsix
+
+      # Trusted publishing needs npm 11.5.1 or later; Node 22 comes with npm 10
+      - run: npm install -g npm@^11.5.1
+
+      - name: Publish to npm
+        run: |
+          for pkg in packages/core packages/mcp; do
+            name=$(node -p "require('./$pkg/package.json').name")
+            version=$(node -p "require('./$pkg/package.json').version")
+            if npm view "$name@$version" version > /dev/null 2>&1; then
+              echo "$name@$version is already on npm, skipping"
+            else
+              npm publish -w "$pkg"
+            fi
+          done
+
+      - name: Publish to the MCP Registry
+        working-directory: packages/mcp
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

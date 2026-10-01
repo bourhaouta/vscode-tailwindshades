@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.bourhaouta/tailwindshades",
+  "title": "Tailwind Shades",
+  "description": "Tailwind CSS palettes (50-950) from any color for v4-v1, and the closest Tailwind color",
+  "repository": {
+    "url": "https://github.com/bourhaouta/vscode-tailwindshades",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "version": "1.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "tailwindshades-mcp",
+      "version": "1.1.0",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" }
+    }
+  ]
+}

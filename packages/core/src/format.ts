@@ -1,5 +1,5 @@
-import { formatColor, type ColorFormat, type Palette } from './palette'
-import type { Output, VersionProfile } from './versions'
+import { formatColor, type ColorFormat, type Palette } from './palette.js'
+import type { Output, VersionProfile } from './versions.js'
 
 export type FormatOptions = {
   name: string
