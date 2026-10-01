@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #1e1e1e; --chrome: #252526; --title: #3c3c3c; --line: #858585; --text: #d4d4d4;
+    --at: #c586c0; --str: #ce9178; --prop: #9cdcfe; --sel: #264f78; --accent: #007acc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 900px; height: 600px; background: linear-gradient(135deg, #fdf2f3, #eef4f5); display: grid; place-items: center; font-family: "Segoe UI", system-ui, sans-serif; }
+  .window { width: 840px; height: 548px; background: var(--bg); border-radius: 10px; overflow: hidden; box-shadow: 0 20px 50px -12px rgba(6, 68, 83, .45), 8px 8px 0 #cddadd; display: flex; flex-direction: column; position: relative; }
+  .titlebar { height: 32px; background: var(--title); display: flex; align-items: center; padding: 0 12px; gap: 8px; color: #ccc; font-size: 12px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .titlebar .name { flex: 1; text-align: center; margin-right: 60px; }
+  .tabs { height: 34px; background: var(--chrome); display: flex; }
+  .tab { background: var(--bg); color: #fff; font-size: 13px; padding: 0 16px; display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--accent); }
+  .tab .icon { color: #42a5f5; font-weight: 700; font-size: 11px; }
+  .editor { flex: 1; padding-top: 8px; font: 14px/21px "Cascadia Code", "Fira Code", Menlo, Consolas, monospace; color: var(--text); overflow: hidden; position: relative; }
+  .row { display: flex; height: 21px; white-space: pre; }
+  .row.new { animation: none; }
+  .ln { width: 52px; text-align: right; padding-right: 22px; color: var(--line); flex: none; }
+  .ln.active { color: #c6c6c6; }
+  .at { color: var(--at); } .str { color: var(--str); } .prop { color: var(--prop); } .punc { color: #d4d4d4; } .sel-text { color: #d7ba7d; } .fn { color: #dcdcaa; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border: 1px solid #fff; margin: 0 4px 0 1px; vertical-align: -1px; }
+  .selected { background: var(--sel); }
+  .caret { display: inline-block; width: 2px; height: 18px; background: #aeafad; vertical-align: -4px; margin-left: -1px; }
+  .flash { background: rgba(219, 77, 83, .18); }
+  /* Quick input (name prompt) */
+  .quick { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); width: 660px; background: #252526; border: 1px solid #454545; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,.5); padding: 6px; font-size: 13px; color: #ccc; display: none; }
+  .quick .qtitle { text-align: center; padding: 4px 0 6px; font-size: 12px; color: #bbb; }
+  .quick .input { background: #3c3c3c; border: 1px solid var(--accent); padding: 5px 8px; color: #fff; font-size: 13px; height: 28px; display: flex; align-items: center; }
+  .quick .input .hl { background: var(--sel); }
+  .quick .msg { padding: 6px 4px 2px; font-size: 12px; color: #9d9d9d; }
+  /* Keys + caption */
+  .keys { position: absolute; bottom: 44px; right: 24px; display: none; gap: 6px; }
+  .key { background: #f5f5f5; color: #1e1e1e; font: 600 15px system-ui, sans-serif; padding: 6px 10px; border-radius: 6px; box-shadow: 0 3px 0 #9aa; }
+  .status { height: 24px; background: var(--accent); color: #fff; font-size: 12px; display: flex; align-items: center; padding: 0 10px; gap: 16px; }
+  .status .right { margin-left: auto; opacity: .9; }
+  .caption { position: absolute; top: 44px; right: 20px; background: #db4d53; color: #fff; font: 600 13px system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; box-shadow: 3px 3px 0 #064453; }
+</style>
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
+      <span class="name">app.css — my-app</span>
+    </div>
+    <div class="tabs"><div class="tab"><span class="icon">#</span> app.css</div></div>
+    <div class="editor" id="editor"></div>
+    <div class="status"><span>main</span><span id="status-msg"></span><span class="right">CSS</span></div>
+    <div class="quick" id="quick">
+      <div class="qtitle">Tailwind Shades: color name</div>
+      <div class="input" id="quick-input"></div>
+      <div class="msg" id="quick-msg"></div>
+    </div>
+    <div class="keys" id="keys"></div>
+    <div class="caption" id="caption"></div>
+  </div>
+
+<script>
+  const data = __DATA__
+
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+  const row = (n, html, active) => `<div class="row"><span class="ln${active ? ' active' : ''}">${n}</span><span>${html}</span></div>`
+
+  // One generated line: property, a color swatch (like VS Code's color decorator), then the value
+  function paletteLine(line, swatch) {
+    const [, prop, value] = line.match(/^(--[^:]+):\s*(.+);$/)
+    return `  <span class="prop">${prop}</span><span class="punc">: </span><span class="swatch" style="background:${swatch}"></span><span class="fn">oklch</span><span class="punc">(</span><span class="str">${esc(value.slice(6, -1))}</span><span class="punc">);</span>`
+  }
+
+  /**
+   * state: { color: 'plain'|'caret'|'selected'|'flash', revealed: number, quick: string|null,
+   *          keys: string[]|null, caption: string, status: string }
+   */
+  window.render = function (state) {
+    const before = [
+      '<span class="at">@import</span> <span class="str">"tailwindcss"</span><span class="punc">;</span>',
+      '',
+      '<span class="at">@theme</span> <span class="punc">{</span>',
+      '  <span class="prop">--font-sans</span><span class="punc">: </span><span class="str">"Rubik"</span><span class="punc">, sans-serif;</span>',
+    ]
+    const after = [
+      '<span class="punc">}</span>',
+      '',
+      '<span class="sel-text">.button</span> <span class="punc">{</span>',
+      '  <span class="prop">background</span><span class="punc">: </span><span class="fn">var</span><span class="punc">(</span><span class="prop">--color-brand-500</span><span class="punc">);</span>',
+      '<span class="punc">}</span>',
+    ]
+
+    let middle
+    if (state.revealed > 0) {
+      middle = data.lines.slice(0, state.revealed).map((line, i) => paletteLine(line, data.swatches[i]))
+    } else {
+      const hex = `<span class="swatch" style="background:#db4d53"></span><span class="str">#db4d53</span>`
+      const cls = state.color === 'selected' ? 'selected' : state.color === 'flash' ? 'flash' : ''
+      middle = [`  <span class="${cls}">${hex}</span>${state.color === 'caret' ? '<span class="caret"></span>' : ''}`]
+    }
+
+    const lines = [...before, ...middle, ...after]
+    document.getElementById('editor').innerHTML = lines
+      .map((html, i) => row(i + 1, html, i === before.length))
+      .join('')
+
+    const quick = document.getElementById('quick')
+    quick.style.display = state.quick === null ? 'none' : 'block'
+    if (state.quick !== null) {
+      const selected = state.quick === 'red'
+      document.getElementById('quick-input').innerHTML = selected
+        ? '<span class="hl">red</span>'
+        : `${esc(state.quick)}<span class="caret" style="height:15px;vertical-align:-3px;margin-left:1px"></span>`
+      document.getElementById('quick-msg').textContent =
+        'Closest Tailwind color: red. Use a custom name like "brand" to avoid replacing it. (Press Enter to confirm)'
+    }
+
+    const keys = document.getElementById('keys')
+    keys.style.display = state.keys ? 'flex' : 'none'
+    keys.innerHTML = (state.keys || []).map((k) => `<span class="key">${k}</span>`).join('')
+
+    const caption = document.getElementById('caption')
+    caption.style.display = state.caption ? 'block' : 'none'
+    caption.textContent = state.caption || ''
+
+    document.getElementById('status-msg').textContent = state.status || ''
+  }
+</script>
+</body>
+</html>
