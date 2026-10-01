@@ -47,6 +47,19 @@ describe('tailwindshades-mcp', () => {
       expect(result.content[0]).toMatchObject({ text: expect.stringContaining('The input color is brand-500.') })
     })
 
+    it('warns when the name replaces a default Tailwind color', async () => {
+      const result = await call('generate_palette', { color: '#db4d53' })
+      expect(result.structuredContent).toMatchObject({ name: 'red', replacesTailwindColor: true })
+      expect(result.content[0]).toMatchObject({ text: expect.stringContaining("replaces Tailwind's own red palette") })
+
+      const named = await call('generate_palette', { color: '#db4d53', name: 'brand' })
+      expect(named.structuredContent).toMatchObject({ replacesTailwindColor: false })
+      expect(named.content[0]).toMatchObject({ text: expect.not.stringContaining('Warning') })
+
+      const builtIn = await call('generate_palette', { color: '#db4d53', name: 'constructor' })
+      expect(builtIn.structuredContent).toMatchObject({ replacesTailwindColor: false })
+    })
+
     it('keeps the input color exactly at its shade', async () => {
       const result = await call('generate_palette', { color: '#db4d53', format: 'hex' })
       const { shades } = result.structuredContent as { shades: { shade: number; value: string }[] }

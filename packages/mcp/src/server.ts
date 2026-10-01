@@ -73,7 +73,11 @@ export function createServer(): McpServer {
           .string()
           .regex(/^[a-z][a-z0-9-]*$/i, 'Use letters, digits and dashes, starting with a letter')
           .optional()
-          .describe('Color name used in the code, e.g. "brand". Defaults to the closest Tailwind color'),
+          .describe(
+            'Color name used in the code, e.g. "brand". Defaults to the closest Tailwind color, ' +
+              "which replaces Tailwind's own palette of that name (e.g. red), so pass a name " +
+              'unless that is what the user wants',
+          ),
         tailwindVersion,
         format: z
           .enum(['oklch', 'hex', 'rgb'])
@@ -97,6 +101,9 @@ export function createServer(): McpServer {
         inputShade: z.number().describe('Shade that holds the input color unchanged, e.g. 400'),
         closestTailwindColor: z.string().describe('Tailwind color whose curve the palette follows'),
         shades: z.array(z.object({ shade: z.number(), value: z.string() })),
+        replacesTailwindColor: z
+          .boolean()
+          .describe("True when the name is a default Tailwind color, so the code replaces Tailwind's palette"),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },
@@ -118,11 +125,16 @@ export function createServer(): McpServer {
         inputShade: result.anchor,
         closestTailwindColor: result.family,
         shades: result.shades,
+        replacesTailwindColor: Object.hasOwn(VERSIONS[result.version].reference.colors, result.name),
       }
       const { name, anchor, shades } = result
       const summary =
         `${name}-${shades[0].shade} to ${name}-${shades.at(-1)!.shade} for Tailwind v${result.version}. ` +
-        `The input color is ${name}-${anchor}.`
+        `The input color is ${name}-${anchor}.` +
+        (structured.replacesTailwindColor
+          ? ` Warning: this replaces Tailwind's own ${name} palette, so every ${name}-* class ` +
+            'in the project changes. Unless the user wants that, call again with a name like "brand".'
+          : '')
       return {
         content: [{ type: 'text', text: `${summary}\n\n${result.text}` }],
         structuredContent: structured,
