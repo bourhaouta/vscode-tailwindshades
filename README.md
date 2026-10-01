@@ -155,7 +155,7 @@ Other agents: run `npx -y tailwindshades-mcp` as a stdio server. It's also in th
 
 ## Development
 
-An npm workspace: the extension is at the root, the palette engine and CLI in [`packages/core`](packages/core), and the MCP server in [`packages/mcp`](packages/mcp).
+An npm workspace: the extension is at the root, the palette engine and CLI in [`packages/core`](packages/core), the MCP server in [`packages/mcp`](packages/mcp), and the website with the remote MCP endpoint (`/mcp`) in [`apps/web`](apps/web) (`npm run dev -w apps/web`).
 
 ```sh
 npm install

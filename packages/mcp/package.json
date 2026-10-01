@@ -29,6 +29,13 @@
   "bin": {
     "tailwindshades-mcp": "dist/bin.js"
   },
+  "exports": {
+    ".": {
+      "tailwindshades-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -36,7 +43,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/build.mjs && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build"
   },

@@ -116,14 +116,15 @@
     "palette": "npm run palette -w packages/core",
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/core && tsc --noEmit -p packages/mcp",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/core && tsc --noEmit -p packages/mcp && tsc --noEmit -p apps/web",
     "test": "vitest run",
     "check": "npm run typecheck && npm test",
     "package": "vsce package --no-dependencies",
     "vscode:prepublish": "npm run build -- --production"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "devDependencies": {
     "tailwindshades-cli": "*",

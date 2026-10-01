@@ -16,6 +16,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm run build -w apps/web
       - run: npm run package
       - uses: actions/upload-artifact@v7
         with:
