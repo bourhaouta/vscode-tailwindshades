@@ -4,6 +4,8 @@ Generate a full [Tailwind CSS](https://tailwindcss.com/) color palette (`50` to 
 
 **[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades)** · **[Open VSX](https://open-vsx.org/extension/bourhaouta/tailwindshades)** (Cursor, Windsurf, VSCodium)
 
+Also as a [command line tool](#command-line) and an [MCP server for AI agents](#use-it-with-ai-agents), with the same palettes.
+
 <img src="media/demo.gif" alt="Put the cursor on #db4d53, press Ctrl+K Ctrl+G, name it brand, and a Tailwind v4 @theme palette from brand-50 to brand-950 is written in OKLCH" width="750">
 
 ## Usage
@@ -97,15 +99,71 @@ Each version uses its own default palette as the reference, so a v1 palette look
 | `tailwindshades.output` | `auto` (from the file type) | `auto`, `theme`, `config`, `cssVariables` |
 | `tailwindshades.promptForName` | `true` | Ask for the color name |
 
+## Command line
+
+The same palettes, without an editor:
+
+```sh
+npx tailwindshades "#db4d53" --name brand
+```
+
+| Option | Values | Default |
+| --- | --- | --- |
+| `-n, --name` | letters, digits and dashes | the closest Tailwind color |
+| `-t, --tailwind` | `4`, `3`, `2`, `1` | `4` |
+| `-f, --format` | `oklch`, `hex`, `rgb` | `oklch` for v4, `hex` before |
+| `-o, --output` | `theme`, `config`, `css` | `theme` for v4, `config` before |
+
+The palette goes to stdout, so you can add it to a file: `npx tailwindshades db4d53 -o css >> colors.css`. More in the [package README](packages/core#readme).
+
+## Use it with AI agents
+
+AI coding agents often guess Tailwind shades, or add one `--color-brand` line instead of a palette. The [`tailwindshades-mcp`](packages/mcp#readme) server gives them two tools:
+
+- `generate_palette`: the same palette code as the extension, for the project's Tailwind version
+- `closest_tailwind_color`: the Tailwind class closest to a color (e.g. `#db4d53` → `red-500`), and whether the difference is visible
+
+Then ask things like *"Add a brand color #db4d53 to my theme"*.
+
+**Claude Code**
+
+```sh
+claude mcp add --scope user tailwindshades -- npx -y tailwindshades-mcp
+```
+
+**Cursor** (`~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project)
+
+```json
+{
+  "mcpServers": {
+    "tailwindshades": { "command": "npx", "args": ["-y", "tailwindshades-mcp"] }
+  }
+}
+```
+
+**VS Code** (`.vscode/mcp.json`)
+
+```json
+{
+  "servers": {
+    "tailwindshades": { "command": "npx", "args": ["-y", "tailwindshades-mcp"] }
+  }
+}
+```
+
+Other agents: run `npx -y tailwindshades-mcp` as a stdio server. It's also in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.bourhaouta/tailwindshades`.
+
 ## Development
+
+An npm workspace: the extension is at the root, the palette engine and CLI in [`packages/core`](packages/core), and the MCP server in [`packages/mcp`](packages/mcp).
 
 ```sh
 npm install
 npm run check   # type check + tests
-npm run build   # bundle to dist/
+npm run build   # bundle the extension to dist/
 ```
 
-Press <kbd>F5</kbd> in VS Code to try the extension in a new window. After upgrading a `tailwindcss` dev dependency, run `npm run palette` to refresh the reference palettes.
+Press <kbd>F5</kbd> in VS Code to try the extension in a new window. After upgrading a `tailwindcss` dev dependency, run `npm run palette` to refresh the reference palettes. After an engine change, `node media/demo/record.mjs` re-records the demo GIF (see the file for setup).
 
 ## License
 
