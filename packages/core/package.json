@@ -52,8 +52,11 @@
   },
   "devDependencies": {
     "@types/culori": "^4.0.1",
+    "@types/node": "^22.20.4",
+    "esbuild": "^0.28.2",
     "tailwindcss": "^4.3.3",
     "tailwindcss-v1": "npm:tailwindcss@^1.9.6",
-    "tailwindcss-v3": "npm:tailwindcss@^3.4.19"
+    "tailwindcss-v3": "npm:tailwindcss@^3.4.19",
+    "typescript": "^7.0.2"
   }
 }
