@@ -12,7 +12,7 @@ const context = await esbuild.context({
   // `vscode` is provided by the editor at runtime
   external: ['vscode'],
   // Use the core package's TypeScript source, so it doesn't need a build first
-  conditions: ['source'],
+  conditions: ['tailwindshades-source'],
   format: 'cjs',
   platform: 'node',
   target: 'node18',

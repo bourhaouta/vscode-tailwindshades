@@ -33,30 +33,36 @@ function hueDifference(from: number, to: number): number {
   return ((((to - from) % 360) + 540) % 360) - 180
 }
 
-// Euclidean distance in OKLab; lightness counts half so the hue picks the family
-function distance(color: Color, [l, c, h]: Oklch): number {
+// Euclidean distance in OKLab, with lightness scaled by `lightnessWeight`
+function distance(color: Color, [l, c, h]: Oklch, lightnessWeight: number): number {
   const hue = ((color.h ?? h) * Math.PI) / 180
   const refHue = (h * Math.PI) / 180
   const da = color.c * Math.cos(hue) - c * Math.cos(refHue)
   const db = color.c * Math.sin(hue) - c * Math.sin(refHue)
-  return Math.hypot((color.l - l) * 0.5, da, db)
+  return Math.hypot((color.l - l) * lightnessWeight, da, db)
 }
 
-/** Finds the Tailwind color and shade index that look most like `color` */
+/**
+ * Finds the Tailwind color and shade index that look most like `color`.
+ * By default lightness counts half, so the hue picks the family: that's the
+ * best curve for a palette. Use `lightnessWeight: 1` for the plain OKLab
+ * distance, to find the shade that looks the same.
+ */
 export function closestTailwindShade(
   color: Color,
   reference: ReferencePalette,
-): { family: string; index: number } {
-  let best = { family: '', index: 0, score: Infinity }
+  { lightnessWeight = 0.5 } = {},
+): { family: string; index: number; distance: number } {
+  let best = { family: '', index: 0, distance: Infinity }
 
   for (const [family, shades] of Object.entries(reference.colors)) {
     shades.forEach((shade, index) => {
-      const score = distance(color, shade)
-      if (score < best.score) best = { family, index, score }
+      const score = distance(color, shade, lightnessWeight)
+      if (score < best.distance) best = { family, index, distance: score }
     })
   }
 
-  return { family: best.family, index: best.index }
+  return best
 }
 
 /**

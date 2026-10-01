@@ -1,6 +1,6 @@
 import { differenceEuclidean, parse } from 'culori'
 import { describe, expect, it } from 'vitest'
-import { formatColor, generatePalette, parseColor, type Color } from '../src/palette'
+import { closestTailwindShade, formatColor, generatePalette, parseColor, type Color } from '../src/palette'
 import { PALETTE_V1, PALETTE_V3, PALETTE_V4, type Oklch } from '../src/tailwind-palette'
 import { VERSIONS } from '../src/versions'
 
@@ -102,5 +102,23 @@ describe('formatColor', () => {
 
   it('writes 0 as the hue of grays', () => {
     expect(formatColor(parseColor('#777777')!, 'oklch')).toMatch(/^oklch\([\d.]+% 0 0\)$/)
+  })
+})
+
+describe('closestTailwindShade', () => {
+  const { reference } = VERSIONS[4]
+  const shadeOf = ({ family, index }: { family: string; index: number }) =>
+    `${family}-${reference.shades[index]}`
+
+  it('finds a stock Tailwind color with no distance', () => {
+    const match = closestTailwindShade(parseColor('oklch(62.3% 0.214 259.815)')!, reference)
+    expect(shadeOf(match)).toBe('blue-500')
+    expect(match.distance).toBe(0)
+  })
+
+  it('weights lightness half by default and fully with lightnessWeight: 1', () => {
+    const color = parseColor('#db4d53')!
+    expect(shadeOf(closestTailwindShade(color, reference))).toBe('red-400')
+    expect(shadeOf(closestTailwindShade(color, reference, { lightnessWeight: 1 }))).toBe('red-500')
   })
 })

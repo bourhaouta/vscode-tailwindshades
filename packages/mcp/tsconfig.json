@@ -6,7 +6,8 @@
     "moduleResolution": "Bundler",
     // Resolve the core package to its TypeScript source (see its "exports")
     "customConditions": ["tailwindshades-source"],
-    "types": ["node", "vscode"],
+    // No vscode types: core must not use the editor API
+    "types": ["node"],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -15,5 +16,5 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }

@@ -1,0 +1,50 @@
+{
+  "name": "tailwindshades-mcp",
+  "version": "0.0.0",
+  "description": "MCP server that gives AI agents correct Tailwind CSS palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
+  "author": "Omar Bourhaouta <bourhaouta@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/bourhaouta/vscode-tailwindshades/tree/main/packages/mcp#readme",
+  "bugs": {
+    "url": "https://github.com/bourhaouta/vscode-tailwindshades/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bourhaouta/vscode-tailwindshades.git",
+    "directory": "packages/mcp"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "tailwind",
+    "tailwindcss",
+    "color",
+    "palette",
+    "oklch",
+    "ai"
+  ],
+  "type": "module",
+  "bin": {
+    "tailwindshades-mcp": "dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.2.0",
+    "zod": "^4.6.5",
+    "tailwindshades": "*"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.2.0"
+  }
+}
