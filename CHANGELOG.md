@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0
+
+- **Website**: [tailwindshades.bourhaouta.com](https://tailwindshades.bourhaouta.com) generates palettes in the browser, with a live preview, the Tailwind color it follows and a shareable link.
+- **Remote MCP server**: AI agents can connect to `https://tailwindshades.bourhaouta.com/mcp`, with nothing to install. The MCP Registry entry lists it next to the `npx` package.
+- **`tailwindshades-mcp` exports `createServer()`**, to host the MCP server in your own app.
+- The extension itself has no changes in this version.
+
 ## 1.1.0
 
 Tailwind Shades is now also a CLI and an MCP server for AI agents, with the same engine as the extension.

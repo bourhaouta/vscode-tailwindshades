@@ -5,6 +5,7 @@ import root from '../../../package.json'
 import core from '../../core/package.json'
 import mcp from '../package.json'
 import server from '../server.json'
+import { mcpUrl, site } from '../../../apps/web/lib/site'
 
 describe('release metadata', () => {
   it('uses one version everywhere', () => {
@@ -16,6 +17,11 @@ describe('release metadata', () => {
 
   it('depends on the core version it is released with', () => {
     expect(mcp.dependencies['tailwindshades-cli']).toBe(`^${root.version}`)
+  })
+
+  it('points the Registry to the website and its /mcp endpoint', () => {
+    expect(server.websiteUrl).toBe(site.url)
+    expect(server.remotes).toEqual([{ type: 'streamable-http', url: mcpUrl }])
   })
 
   it('links the npm package and the MCP Registry entry', () => {
