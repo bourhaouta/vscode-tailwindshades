@@ -8,5 +8,7 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "include": ["src"]
+  "include": ["src"],
+  // The CLI is not part of the library API
+  "exclude": ["src/bin.ts", "src/cli.ts"]
 }

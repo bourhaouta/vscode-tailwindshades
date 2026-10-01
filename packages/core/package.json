@@ -19,9 +19,15 @@
     "color",
     "palette",
     "shades",
-    "oklch"
+    "oklch",
+    "cli",
+    "tailwind v4",
+    "theme"
   ],
   "type": "module",
+  "bin": {
+    "tailwindshades": "dist/bin.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
