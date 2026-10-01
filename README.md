@@ -4,7 +4,7 @@ Generate a full [Tailwind CSS](https://tailwindcss.com/) color palette (`50` to 
 
 **[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades)** · **[Open VSX](https://open-vsx.org/extension/bourhaouta/tailwindshades)** (Cursor, Windsurf, VSCodium)
 
-Also as a [command line tool](#command-line) and an [MCP server for AI agents](#use-it-with-ai-agents), with the same palettes.
+Also as a [command line tool](#command-line) and an [MCP server for AI agents](#use-it-with-ai-agents), with the same palettes. Try it in the browser: **[tailwindshades.bourhaouta.com](https://tailwindshades.bourhaouta.com)**.
 
 <img src="media/demo.gif" alt="Put the cursor on #db4d53, press Ctrl+K Ctrl+G, name it brand, and a Tailwind v4 @theme palette from brand-50 to brand-950 is written in OKLCH" width="750">
 
@@ -125,10 +125,12 @@ AI coding agents often guess Tailwind shades, or add one `--color-brand` line in
 
 Then ask things like *"Add a brand color #db4d53 to my theme"*.
 
+**Remote**, nothing to install: connect to `https://tailwindshades.bourhaouta.com/mcp`.
+
 **Claude Code**
 
 ```sh
-claude mcp add --scope user tailwindshades -- npx -y tailwindshades-mcp
+claude mcp add --transport http --scope user tailwindshades https://tailwindshades.bourhaouta.com/mcp
 ```
 
 **Cursor** (`~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project)
@@ -136,7 +138,7 @@ claude mcp add --scope user tailwindshades -- npx -y tailwindshades-mcp
 ```json
 {
   "mcpServers": {
-    "tailwindshades": { "command": "npx", "args": ["-y", "tailwindshades-mcp"] }
+    "tailwindshades": { "url": "https://tailwindshades.bourhaouta.com/mcp" }
   }
 }
 ```
@@ -146,12 +148,14 @@ claude mcp add --scope user tailwindshades -- npx -y tailwindshades-mcp
 ```json
 {
   "servers": {
-    "tailwindshades": { "command": "npx", "args": ["-y", "tailwindshades-mcp"] }
+    "tailwindshades": { "type": "http", "url": "https://tailwindshades.bourhaouta.com/mcp" }
   }
 }
 ```
 
-Other agents: run `npx -y tailwindshades-mcp` as a stdio server. It's also in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.bourhaouta/tailwindshades`.
+**Local**: run `npx -y tailwindshades-mcp` as a stdio server instead, for example `claude mcp add --scope user tailwindshades -- npx -y tailwindshades-mcp`. Setup for each agent is in the [package README](packages/mcp#readme).
+
+It's also in the [MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.bourhaouta/tailwindshades`, with both options.
 
 ## Development
 

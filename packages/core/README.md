@@ -2,7 +2,7 @@
 
 Generate a full [Tailwind CSS](https://tailwindcss.com/) color palette (`50` to `950`) from any color. Works with **Tailwind v4, v3, v2 and v1**.
 
-The engine behind the [Tailwind Shades](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades) editor extension, as a command line tool and a library.
+The engine behind the [Tailwind Shades](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades) editor extension, as a command line tool and a library. Try it in the browser: [tailwindshades.bourhaouta.com](https://tailwindshades.bourhaouta.com).
 
 ## Command line
 
