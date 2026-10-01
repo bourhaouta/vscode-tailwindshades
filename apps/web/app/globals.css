@@ -93,7 +93,7 @@
 
 @utility site-container {
   @apply mx-auto w-full px-4;
-  max-width: 960px;
+  max-width: 768px;
 }
 
 /* The current palette's color (set by the generator), readable on light and dark pages */

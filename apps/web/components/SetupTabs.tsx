@@ -3,19 +3,39 @@
 import { useState, type ReactNode } from 'react'
 import { mcpUrl, site } from '@/lib/site'
 import CodeBlock from './CodeBlock'
+import Segmented from './Segmented'
 
-function Agent({ name, note, code }: { name: string; note?: string; code: string }) {
+const json = (value: unknown) => JSON.stringify(value, null, 2)
+
+const agents = [
+  { value: 'claude', label: 'Claude Code', file: '', code: `claude mcp add --transport http --scope user tailwindshades ${mcpUrl}` },
+  { value: 'cursor', label: 'Cursor', file: '~/.cursor/mcp.json', code: json({ mcpServers: { tailwindshades: { url: mcpUrl } } }) },
+  {
+    value: 'vscode',
+    label: 'VS Code',
+    file: '.vscode/mcp.json',
+    code: json({ servers: { tailwindshades: { type: 'http', url: mcpUrl } } }),
+  },
+]
+
+/** One agent's setup at a time, so the section stays short */
+function Agents() {
+  const [selected, setSelected] = useState(agents[0].value)
+  const agent = agents.find(({ value }) => value === selected)!
+
   return (
-    <div>
-      <h3 className="mb-2 text-sm font-medium">
-        {name} {note && <span className="font-normal text-muted">{note}</span>}
-      </h3>
-      <CodeBlock code={code} />
+    <div className="space-y-3">
+      <Segmented label="Your agent" options={agents} value={selected} onChange={setSelected} />
+      {agent.file && (
+        <p className="text-sm text-muted">
+          In <code>{agent.file}</code>:
+        </p>
+      )}
+      {/* The Claude Code command is one long line */}
+      <CodeBlock code={agent.code} wrap={!agent.file} />
     </div>
   )
 }
-
-const json = (value: unknown) => JSON.stringify(value, null, 2)
 
 const tabs: { id: string; label: string; content: ReactNode }[] = [
   {
@@ -27,17 +47,7 @@ const tabs: { id: string; label: string; content: ReactNode }[] = [
           Agents often guess Tailwind shades, or add one <code>--color-brand</code> line instead of a palette. Connect
           the MCP server and ask: <em>&ldquo;Add a brand color #db4d53 to my theme.&rdquo;</em> Nothing to install:
         </p>
-        <Agent name="Claude Code" code={`claude mcp add --transport http --scope user tailwindshades ${mcpUrl}`} />
-        <Agent
-          name="Cursor"
-          note="(~/.cursor/mcp.json)"
-          code={json({ mcpServers: { tailwindshades: { url: mcpUrl } } })}
-        />
-        <Agent
-          name="VS Code"
-          note="(.vscode/mcp.json)"
-          code={json({ servers: { tailwindshades: { type: 'http', url: mcpUrl } } })}
-        />
+        <Agents />
         <p className="text-sm text-muted">
           Prefer it local? Run <code>npx -y tailwindshades-mcp</code> as a stdio server. It&apos;s also in the{' '}
           <a className="underline hover:text-accent" href="https://registry.modelcontextprotocol.io">
@@ -75,7 +85,7 @@ const tabs: { id: string; label: string; content: ReactNode }[] = [
     content: (
       <div className="space-y-3">
         <p>The same palettes in your terminal. Options for the version, format and output, like on this page.</p>
-        <CodeBlock code={'npx tailwindshades-cli "#db4d53" --name brand'} />
+        <CodeBlock code={'npx tailwindshades-cli "#db4d53" --name brand'} wrap />
         <p className="text-sm text-muted">
           Or as a library: <code>{"import { createPalette } from 'tailwindshades-cli'"}</code>
         </p>

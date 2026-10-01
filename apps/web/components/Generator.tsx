@@ -36,14 +36,14 @@ function Strip({ label, swatches, marked }: { label: string; swatches: Swatch[];
           return (
             <li
               key={shade}
-              className={`flex h-10 items-center justify-between rounded-sm px-3 text-xs sm:h-20 sm:flex-col sm:items-start sm:justify-end sm:px-2 sm:py-1.5 ${text} ${
+              className={`flex h-10 items-center justify-between rounded-sm px-3 text-xs sm:h-16 sm:flex-col sm:items-start sm:justify-end sm:px-2 sm:py-1.5 ${text} ${
                 isMarked ? 'ring-2 ring-ink ring-offset-2 ring-offset-page' : ''
               }`}
               style={{ backgroundColor: formatColor(color, 'oklch') }}
               title={formatColor(color, 'hex')}
             >
               <span className="font-semibold">{shade}</span>
-              {isMarked && <span className="text-[0.6875rem]">your color</span>}
+              {isMarked && <span className="text-[0.6875rem]">yours</span>}
             </li>
           )
         })}
