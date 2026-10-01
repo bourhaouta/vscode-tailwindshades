@@ -50,7 +50,7 @@ function distance(color: Color, [l, c, h]: Oklch, lightnessWeight: number): numb
  */
 export function closestTailwindShade(
   color: Color,
-  reference: ReferencePalette,
+  reference: Pick<ReferencePalette, 'shades' | 'colors'>,
   { lightnessWeight = 0.5 } = {},
 ): { family: string; index: number; distance: number } {
   let best = { family: '', index: 0, distance: Infinity }

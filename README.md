@@ -125,10 +125,11 @@ The palette goes to stdout, so you can add it to a file: `npx tailwindshades-cli
 
 ## Use it with AI agents
 
-AI coding agents often guess Tailwind shades, or add one `--color-brand` line instead of a palette. The [`tailwindshades-mcp`](packages/mcp#readme) server gives them two tools:
+AI coding agents often guess Tailwind shades, or add one `--color-brand` line instead of a palette. The [`tailwindshades-mcp`](packages/mcp#readme) server gives them three tools:
 
 - `generate_palette`: the same palette code as the extension, for the project's Tailwind version
-- `closest_tailwind_color`: the Tailwind class closest to a color (e.g. `#db4d53` → `red-500`), and whether the difference is visible
+- `find_closest_tailwind_color`: the Tailwind class closest to a color (e.g. `#db4d53` → `red-500`), and whether the difference is visible
+- `get_tailwind_palette`: Tailwind's own default colors, exactly as Tailwind defines them (e.g. `slate-500`), so agents don't write them from memory
 
 Then ask things like *"Add a brand color #db4d53 to my theme"*.
 

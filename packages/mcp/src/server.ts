@@ -38,6 +38,19 @@ function bothFormats(value: Parameters<typeof formatColor>[0]) {
   return { oklch: formatColor(value, 'oklch'), hex: formatColor(value, 'hex') }
 }
 
+/**
+ * Tailwind's own value for a shade, exactly as Tailwind writes it (oklch() in
+ * v4, hex before), plus the same color in the other format.
+ */
+function tailwindValue(version: TailwindVersion, name: string, index: number) {
+  const { reference } = VERSIONS[version]
+  const exact = reference.values[name][index]
+  const [l, c, h] = reference.colors[name][index]
+  return version === 4
+    ? { oklch: exact, hex: formatColor({ l, c, h }, 'hex') }
+    : { oklch: formatColor({ l, c, h }, 'oklch'), hex: exact }
+}
+
 function parse(input: string) {
   const parsed = parseColor(input)
   if (!parsed) throw new Error(`"${input}" is not a valid CSS color`)
@@ -55,7 +68,9 @@ export function createServer(): McpServer {
         'hover:bg-brand-600 work. Never write a single --color-* variable or invent shades by hand: ' +
         'call generate_palette and paste its code. Match tailwindVersion to the project ' +
         '(v4: @import "tailwindcss" in CSS; v3 and older: tailwind.config.js). ' +
-        'To replace a hard-coded color with an existing Tailwind class, call closest_tailwind_color.',
+        'To replace a hard-coded color with an existing Tailwind class, call find_closest_tailwind_color. ' +
+        "For Tailwind's own default colors (e.g. the value of slate-500), call get_tailwind_palette " +
+        'instead of writing them from memory.',
     },
   )
 
@@ -145,7 +160,7 @@ export function createServer(): McpServer {
   )
 
   server.registerTool(
-    'closest_tailwind_color',
+    'find_closest_tailwind_color',
     {
       title: 'Find the closest Tailwind color',
       description:
@@ -172,13 +187,12 @@ export function createServer(): McpServer {
       const { reference } = VERSIONS[version]
       // Full lightness weight: the shade that looks the same, not the best palette curve
       const { family, index, distance } = closestTailwindShade(parsed, reference, { lightnessWeight: 1 })
-      const [l, c, h] = reference.colors[family][index]
       const shade = reference.shades[index]
       const structured = {
         name: family,
         shade,
         className: `${family}-${shade}`,
-        tailwindValue: bothFormats({ l, c, h }),
+        tailwindValue: tailwindValue(version, family, index),
         input: bothFormats(parsed),
         distance: Number(distance.toFixed(4)),
         visiblyDifferent: distance >= VISIBLE_DIFFERENCE,
@@ -194,6 +208,68 @@ export function createServer(): McpServer {
             text:
               `Closest Tailwind v${version} color: ${family}-${shade} ` +
               `(${structured.tailwindValue.hex}, input ${structured.input.hex}). ${advice}`,
+          },
+        ],
+        structuredContent: structured,
+      }
+    },
+  )
+
+  server.registerTool(
+    'get_tailwind_palette',
+    {
+      title: "Get Tailwind's default colors",
+      description:
+        "Looks up Tailwind's own default colors, exactly as Tailwind defines them: a whole color " +
+        '(e.g. "blue", all shades) or one shade (e.g. "slate-500"), for Tailwind v4, v3, v2 or v1. ' +
+        'Use it instead of writing default Tailwind color values from memory. Values are oklch() ' +
+        'in v4 and hex in older versions.',
+      inputSchema: z.object({
+        name: z
+          .string()
+          .describe('A default Tailwind color, like "blue", or one shade of it, like "blue-500"'),
+        tailwindVersion,
+      }),
+      outputSchema: z.object({
+        name: z.string().describe('Tailwind color name, e.g. "blue"'),
+        tailwindVersion: z.number(),
+        shades: z
+          .array(
+            z.object({
+              shade: z.number(),
+              className: z.string().describe('Color part of a utility class, e.g. "blue-500" for bg-blue-500'),
+              value: z.string().describe("Tailwind's value: oklch() in v4, hex in older versions"),
+            }),
+          )
+          .describe('All shades, or only the one asked for'),
+      }),
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    },
+    async (input) => {
+      const version = (input.tailwindVersion ?? 4) as TailwindVersion
+      const { reference } = VERSIONS[version]
+      const match = input.name.trim().toLowerCase().match(/^([a-z]+)(?:-(\d+))?$/)
+      const name = match?.[1] ?? ''
+      if (!Object.hasOwn(reference.values, name)) {
+        const names = Object.keys(reference.values).join(', ')
+        throw new Error(`"${input.name}" is not a default Tailwind v${version} color. Colors: ${names}`)
+      }
+      const wanted = match?.[2] === undefined ? undefined : Number(match[2])
+      if (wanted !== undefined && !reference.shades.includes(wanted)) {
+        throw new Error(`Tailwind v${version} has no ${name}-${wanted}. Shades: ${reference.shades.join(', ')}`)
+      }
+
+      const shades = reference.shades
+        .map((shade, index) => ({ shade, className: `${name}-${shade}`, value: reference.values[name][index] }))
+        .filter(({ shade }) => wanted === undefined || shade === wanted)
+      const structured = { name, tailwindVersion: version, shades }
+      return {
+        content: [
+          {
+            type: 'text',
+            text:
+              `Tailwind v${version} ${wanted === undefined ? name : `${name}-${wanted}`}:\n` +
+              shades.map(({ className, value }) => `${className}: ${value}`).join('\n'),
           },
         ],
         structuredContent: structured,

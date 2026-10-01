@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
 import { differenceEuclidean, parse } from 'culori'
 import { describe, expect, it } from 'vitest'
 import { closestTailwindShade, formatColor, generatePalette, parseColor, type Color } from '../src/palette'
@@ -171,5 +174,35 @@ describe('closestTailwindShade', () => {
     const color = parseColor('#db4d53')!
     expect(shadeOf(closestTailwindShade(color, reference))).toBe('red-400')
     expect(shadeOf(closestTailwindShade(color, reference, { lightnessWeight: 1 }))).toBe('red-500')
+  })
+})
+
+describe('reference values', () => {
+  const require = createRequire(import.meta.url)
+  const tailwindDir = (pkg: string) => dirname(require.resolve(`${pkg}/package.json`))
+
+  it('match Tailwind v4 exactly (theme.css)', () => {
+    const css = readFileSync(join(tailwindDir('tailwindcss'), 'theme.css'), 'utf8')
+    for (const [name, values] of Object.entries(PALETTE_V4.values)) {
+      values.forEach((value, index) => {
+        const declared = css.match(new RegExp(`--color-${name}-${PALETTE_V4.shades[index]}:\\s*([^;]+);`))![1]
+        expect(value).toBe(declared.trim())
+      })
+    }
+  })
+
+  it.each([
+    ['v3', PALETTE_V3, () => require('tailwindcss-v3/colors')],
+    ['v1', PALETTE_V1, () => require('tailwindcss-v1/stubs/defaultConfig.stub.js').theme.colors],
+  ])('match Tailwind %s exactly (hex)', (_, reference, load) => {
+    const colors = load()
+    for (const [name, values] of Object.entries(reference.values)) {
+      values.forEach((value, index) => expect(value).toBe(colors[name][reference.shades[index]].toLowerCase()))
+    }
+  })
+
+  it('keep v2 at 50-900, like its shades', () => {
+    expect(VERSIONS[2].reference.values.blue).toHaveLength(10)
+    expect(VERSIONS[2].reference.values.blue.at(-1)).toBe(PALETTE_V3.values.blue.at(-2))
   })
 })

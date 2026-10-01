@@ -18,15 +18,9 @@ export type VersionProfile = {
 /** Keeps only `shades` from a reference palette (e.g. v2 has no 950) */
 function withShades(reference: ReferencePalette, shades: readonly number[]): ReferencePalette {
   const indexes = shades.map((shade) => reference.shades.indexOf(shade))
-  return {
-    shades,
-    colors: Object.fromEntries(
-      Object.entries(reference.colors).map(([name, values]) => [
-        name,
-        indexes.map((index) => values[index]),
-      ]),
-    ),
-  }
+  const pick = <T,>(byName: Record<string, readonly T[]>) =>
+    Object.fromEntries(Object.entries(byName).map(([name, list]) => [name, indexes.map((index) => list[index])]))
+  return { shades, colors: pick(reference.colors), values: pick(reference.values) }
 }
 
 export const VERSIONS: Record<TailwindVersion, VersionProfile> = {

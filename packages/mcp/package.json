@@ -1,6 +1,6 @@
 {
   "name": "tailwindshades-mcp",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "MCP server that gives AI agents correct Tailwind CSS palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
   "mcpName": "io.github.bourhaouta/tailwindshades",
   "author": "Omar Bourhaouta <bourhaouta@gmail.com>",
@@ -50,7 +50,7 @@
   "dependencies": {
     "@modelcontextprotocol/server": "^2.2.0",
     "zod": "^4.6.5",
-    "tailwindshades-cli": "^1.2.0"
+    "tailwindshades-cli": "^1.3.0"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.2.0",
