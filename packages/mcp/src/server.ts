@@ -98,7 +98,7 @@ export function createServer(): McpServer {
         tailwindVersion: z.number(),
         format: z.string(),
         output: z.string(),
-        inputShade: z.number().describe('Shade that holds the input color unchanged, e.g. 400'),
+        inputShade: z.number().describe('Shade that holds the input color unchanged, e.g. 500'),
         closestTailwindColor: z.string().describe('Tailwind color whose curve the palette follows'),
         shades: z.array(z.object({ shade: z.number(), value: z.string() })),
         replacesTailwindColor: z
@@ -125,7 +125,7 @@ export function createServer(): McpServer {
         inputShade: result.anchor,
         closestTailwindColor: result.family,
         shades: result.shades,
-        replacesTailwindColor: Object.hasOwn(VERSIONS[result.version].reference.colors, result.name),
+        replacesTailwindColor: result.replacesTailwindColor,
       }
       const { name, anchor, shades } = result
       const summary =
@@ -154,7 +154,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({ color, tailwindVersion }),
       outputSchema: z.object({
         name: z.string().describe('Tailwind color name, e.g. "red"'),
-        shade: z.number().describe('Closest shade, e.g. 400'),
+        shade: z.number().describe('Closest shade, e.g. 500'),
         className: z.string().describe('Color part of a utility class, e.g. "red-400" for bg-red-400'),
         tailwindValue: z.object({ oklch: z.string(), hex: z.string() }).describe("Tailwind's value for that shade"),
         input: z.object({ oklch: z.string(), hex: z.string() }).describe('The input color'),

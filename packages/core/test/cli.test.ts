@@ -28,7 +28,9 @@ describe('createPalette', () => {
   })
 
   it('uses the closest Tailwind color as the default name', () => {
-    expect(createPalette({ color: '#3b82f6' }).name).toBe('blue')
+    expect(createPalette({ color: '#3b82f6' })).toMatchObject({ name: 'blue', replacesTailwindColor: true })
+    expect(createPalette({ color: '#3b82f6', name: 'brand' }).replacesTailwindColor).toBe(false)
+    expect(createPalette({ color: '#3b82f6', name: 'constructor' }).replacesTailwindColor).toBe(false)
   })
 
   it('uses hex and a config object for older versions', () => {
@@ -56,6 +58,11 @@ describe('runCli', () => {
     const lines = stdout.trimEnd().split('\n')
     expect(lines[0]).toMatch(/^--brand-100: rgb\(\d+, \d+, \d+\);$/)
     expect(lines).toHaveLength(9)
+  })
+
+  it('notes when the name replaces a default Tailwind color', () => {
+    expect(runCli(['#db4d53']).stderr).toContain("Note: this replaces Tailwind's own red palette")
+    expect(runCli(['#db4d53', '-n', 'brand']).stderr).not.toContain('Note')
   })
 
   it('accepts hex without #', () => {

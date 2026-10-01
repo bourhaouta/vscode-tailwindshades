@@ -74,11 +74,14 @@ export function runCli(args: string[]): CliResult {
 
     const { name, shades, version, anchor } = result
     const range = `${name}-${shades[0].shade} to ${name}-${shades.at(-1)!.shade}`
+    const note = result.replacesTailwindColor
+      ? `Note: this replaces Tailwind's own ${name} palette. Use --name to keep it, e.g. --name brand\n`
+      : ''
     return {
       code: 0,
       stdout: `${result.text}\n`,
       // Goes to stderr so `> file.css` gets only the palette
-      stderr: `${range} (Tailwind v${version}), your color is ${name}-${anchor}\n`,
+      stderr: `${range} (Tailwind v${version}), your color is ${name}-${anchor}\n${note}`,
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
