@@ -20,8 +20,12 @@ describe('parseColor', () => {
     expect(parseColor(input)).toBeUndefined()
   })
 
-  it('treats grays as having no hue', () => {
+  it('gives pure grays no hue', () => {
     expect(parseColor('#777777')?.h).toBeUndefined()
+  })
+
+  it('keeps the hue of tinted grays', () => {
+    expect(parseColor('#7a6f67')?.h).toBeCloseTo(58.4, 1)
   })
 })
 
@@ -58,6 +62,17 @@ describe('generatePalette', () => {
         expect(generatePalette(toColor(shade), reference).anchor).toBe(reference.shades[index])
       })
     }
+  })
+
+  it.each([
+    ['#7a6f67', 'stone', 500],
+    ['#6a737c', 'zinc', 500],
+    ['#777777', 'neutral', 500],
+  ])('matches the gray %s by its hue and keeps it exact', (hex, family, anchor) => {
+    const palette = generatePalette(parseColor(hex)!, VERSIONS[4].reference)
+    expect([palette.family, palette.anchor]).toEqual([family, anchor])
+    const kept = palette.shades.find(({ shade }) => shade === anchor)!.color
+    expect(formatColor(kept, 'hex')).toBe(hex)
   })
 
   it('puts a color at the shade with the closest lightness, not the closest chroma', () => {

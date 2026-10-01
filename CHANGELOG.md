@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **Better shade fit**: your color now goes to the shade with the closest lightness in its Tailwind color, so the palette follows Tailwind's light-to-dark steps more closely. For example, `#db4d53` is now `500` in v4 (was `400`), and Tailwind v3's `violet-600` stays `600` in v4 (was `500`). Most colors don't change.
+- **Tinted grays fixed**: a slightly warm or cool gray now keeps its exact value at its shade (before, its hue was dropped, so `#7a6f67` came out as `#7b6d71`), and it follows the Tailwind gray with the same tint (`stone` for warm grays instead of `zinc`).
 
 ## 1.0.0
 

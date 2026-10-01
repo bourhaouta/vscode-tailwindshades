@@ -1,21 +1,14 @@
-import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { Client } from '@modelcontextprotocol/client'
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-// From source, so it loads before beforeAll builds the packages
 import { createPalette } from '../../core/src/create'
 
 const root = (path: string) => fileURLToPath(new URL(`../../${path}`, import.meta.url))
 const client = new Client({ name: 'test', version: '1.0.0' })
 
-// Runs the real server over stdio, the way an AI agent starts it with npx
-beforeAll(async () => {
-  for (const pkg of ['core', 'mcp']) {
-    execFileSync('node', ['scripts/build.mjs'], { cwd: root(pkg), stdio: 'ignore' })
-  }
-  await client.connect(new StdioClientTransport({ command: 'node', args: [root('mcp/dist/bin.js')] }))
-}, 30_000)
+// Runs the real server (built by test/setup.ts) over stdio, the way an AI agent starts it with npx
+beforeAll(() => client.connect(new StdioClientTransport({ command: 'node', args: [root('mcp/dist/bin.js')] })))
 
 afterAll(() => client.close())
 
@@ -111,6 +104,14 @@ describe('tailwindshades-mcp', () => {
         visiblyDifferent: true,
       })
       expect(result.content[0]).toMatchObject({ text: expect.stringContaining('use generate_palette') })
+    })
+
+    it('matches a tinted gray by its hue', async () => {
+      // A warm gray: stone is warm, zinc is cool
+      const result = await call('closest_tailwind_color', { color: 'oklch(55% 0.018 60)' })
+      expect(result.structuredContent).toMatchObject({ className: 'stone-500', visiblyDifferent: false })
+      const cool = await call('closest_tailwind_color', { color: 'oklch(55% 0.018 250)' })
+      expect(cool.structuredContent).toMatchObject({ className: 'gray-500' })
     })
 
     it('uses the older palette for older versions', async () => {

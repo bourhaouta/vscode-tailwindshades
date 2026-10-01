@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import packageJson from '../package.json'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { runCli } from '../src/cli'
 import { createPalette } from '../src/create'
 import { formatPalette } from '../src/format'
@@ -83,9 +83,8 @@ describe('runCli', () => {
 })
 
 describe('bin', () => {
+  // Tests the real bundle (built by test/setup.ts): shebang, chunks and the package.json lookup
   const cwd = new URL('..', import.meta.url)
-  // Tests the real bundle: shebang, chunks and the package.json lookup
-  beforeAll(() => execFileSync('node', ['scripts/build.mjs'], { cwd, stdio: 'ignore' }))
 
   it('runs from the command line', () => {
     const run = (args: string[]) =>
