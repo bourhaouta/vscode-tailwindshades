@@ -15,14 +15,6 @@ export type Palette = {
   shades: { shade: number; color: Color }[]
 }
 
-// Below this chroma a color is treated as gray: its shades take the hue of the
-// matched Tailwind gray instead of its own
-const GRAY_CHROMA = 0.02
-
-function isGray(color: Color): boolean {
-  return color.h === undefined || color.c < GRAY_CHROMA
-}
-
 const toOklch = converter('oklch')
 
 /** Parses any CSS color (hex, rgb(), hsl(), oklch(), named colors, ...) */
@@ -116,17 +108,8 @@ export function generatePalette(color: Color, reference: ReferencePalette): Pale
 
     const chroma = chromaScale === undefined ? color.c * (1 - fade) : c * chromaScale
 
-    // Colors keep their hue, plus Tailwind's small hue drift between shades.
-    // Grays take the tint of the matched Tailwind gray, unless it has none
-    // (neutral): then its hue is only a placeholder, so they keep their own.
-    const hue =
-      color.h === undefined
-        ? h
-        : !isGray(color)
-          ? (color.h + hueDifference(refH, h) + 360) % 360
-          : chromaScale === undefined
-            ? color.h
-            : h
+    // Keep the input hue, plus Tailwind's small hue drift between shades
+    const hue = color.h === undefined ? h : (color.h + hueDifference(refH, h) + 360) % 360
 
     return {
       shade,
