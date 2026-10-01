@@ -81,6 +81,14 @@ jobs:
       - name: Publish to the MCP Registry
         working-directory: packages/mcp
         run: |
+          # The Registry checks the npm package, and npm takes a few minutes
+          # to serve a new version, so wait for it (up to 15 minutes)
+          version=$(node -p "require('./package.json').version")
+          for attempt in $(seq 1 30); do
+            npm view "tailwindshades-mcp@$version" version > /dev/null 2>&1 && break
+            echo "Waiting for tailwindshades-mcp@$version on npm ($attempt/30)"
+            sleep 30
+          done
           curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish
