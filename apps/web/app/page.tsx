@@ -1,27 +1,15 @@
 import Generator from '@/components/Generator'
+import Logo from '@/components/Logo'
 import SetupTabs from '@/components/SetupTabs'
 import { site } from '@/lib/site'
 
-// The logo shows the current palette (set by the generator); these shades of
-// #db4d53 are the defaults until it runs
-const logo = [
-  'var(--brand-200, #f4cbcd)',
-  'var(--brand-400, #e57278)',
-  'var(--brand-500, #db4d53)',
-  'var(--brand-700, #a92e31)',
-  'var(--brand-900, #74292b)',
-]
 
 export default function Home() {
   return (
     <>
       <header className="site-container flex items-center justify-between py-5">
         <a href="/" className="flex items-center gap-2 font-semibold">
-          <span aria-hidden className="flex h-5 overflow-hidden rounded-sm">
-            {logo.map((color) => (
-              <span key={color} className="w-1.5 transition-colors duration-300" style={{ backgroundColor: color }} />
-            ))}
-          </span>
+          <Logo className="h-7 w-auto" />
           {site.name}
         </a>
         <nav className="flex gap-4 text-sm text-muted">

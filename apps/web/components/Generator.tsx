@@ -18,7 +18,7 @@ import Segmented from './Segmented'
 type Swatch = { shade: number; color: Color }
 
 // Shades the page uses outside the generator; every Tailwind version has them
-const BRAND_SHADES = [200, 400, 500, 700, 900]
+const BRAND_SHADES = [400, 500, 600, 700, 800, 900]
 
 /** One row of shades. The `marked` shade gets a "your color" label. */
 function Strip({ label, swatches, marked }: { label: string; swatches: Swatch[]; marked?: number }) {

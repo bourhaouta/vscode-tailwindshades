@@ -8,7 +8,8 @@ export type Settings = {
   output: Output | 'auto'
 }
 
-export const DEFAULTS: Settings = { color: '#db4d53', name: 'brand', version: 4, format: 'auto', output: 'auto' }
+// The default is the teal of the logo (Tailwind v1 teal-700)
+export const DEFAULTS: Settings = { color: '#2c7a7b', name: 'brand', version: 4, format: 'auto', output: 'auto' }
 
 const VERSIONS = ['4', '3', '2', '1']
 const FORMATS = ['oklch', 'hex', 'rgb']
