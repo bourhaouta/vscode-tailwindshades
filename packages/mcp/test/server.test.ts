@@ -21,7 +21,11 @@ describe('tailwindshades-mcp', () => {
 
   it('lists the tools as read-only', async () => {
     const { tools } = await client.listTools()
-    expect(tools.map((tool) => tool.name).sort()).toEqual(['closest_tailwind_color', 'generate_palette'])
+    expect(tools.map((tool) => tool.name).sort()).toEqual([
+      'find_closest_tailwind_color',
+      'generate_palette',
+      'get_tailwind_palette',
+    ])
     for (const tool of tools) {
       expect(tool.description).toBeTruthy()
       expect(tool.outputSchema).toBeDefined()
@@ -95,9 +99,9 @@ describe('tailwindshades-mcp', () => {
     })
   })
 
-  describe('closest_tailwind_color', () => {
+  describe('find_closest_tailwind_color', () => {
     it('finds a stock Tailwind color', async () => {
-      const result = await call('closest_tailwind_color', { color: 'oklch(62.3% 0.214 259.815)' })
+      const result = await call('find_closest_tailwind_color', { color: 'oklch(62.3% 0.214 259.815)' })
       expect(result.structuredContent).toEqual({
         name: 'blue',
         shade: 500,
@@ -112,7 +116,7 @@ describe('tailwindshades-mcp', () => {
     })
 
     it('finds the closest shade of a custom color', async () => {
-      const result = await call('closest_tailwind_color', { color: '#db4d53' })
+      const result = await call('find_closest_tailwind_color', { color: '#db4d53' })
       expect(result.structuredContent).toMatchObject({
         className: 'red-500',
         tailwindValue: { hex: '#fb2c36' },
@@ -124,14 +128,14 @@ describe('tailwindshades-mcp', () => {
 
     it('matches a tinted gray by its hue', async () => {
       // A warm gray: stone is warm, zinc is cool
-      const result = await call('closest_tailwind_color', { color: 'oklch(55% 0.018 60)' })
+      const result = await call('find_closest_tailwind_color', { color: 'oklch(55% 0.018 60)' })
       expect(result.structuredContent).toMatchObject({ className: 'stone-500', visiblyDifferent: false })
-      const cool = await call('closest_tailwind_color', { color: 'oklch(55% 0.018 250)' })
+      const cool = await call('find_closest_tailwind_color', { color: 'oklch(55% 0.018 250)' })
       expect(cool.structuredContent).toMatchObject({ className: 'gray-500' })
     })
 
     it('uses the older palette for older versions', async () => {
-      const result = await call('closest_tailwind_color', { color: '#3b82f6', tailwindVersion: 3 })
+      const result = await call('find_closest_tailwind_color', { color: '#3b82f6', tailwindVersion: 3 })
       expect(result.structuredContent).toMatchObject({
         className: 'blue-500',
         tailwindValue: { hex: '#3b82f6' },
@@ -140,8 +144,43 @@ describe('tailwindshades-mcp', () => {
     })
 
     it('returns an error for an invalid color', async () => {
-      const result = await call('closest_tailwind_color', { color: 'nope' })
+      const result = await call('find_closest_tailwind_color', { color: 'nope' })
       expect(result.isError).toBe(true)
+    })
+
+    it("returns Tailwind's exact value, not a rounded one", async () => {
+      // Rounding through OKLCH used to give #39b2ac
+      const result = await call('find_closest_tailwind_color', { color: '#38b2ac', tailwindVersion: 1 })
+      expect(result.structuredContent).toMatchObject({ className: 'teal-500', tailwindValue: { hex: '#38b2ac' } })
+    })
+  })
+
+  describe('get_tailwind_palette', () => {
+    it('returns every shade of a color, exactly as Tailwind v4 writes it', async () => {
+      const result = await call('get_tailwind_palette', { name: 'blue' })
+      const { shades } = result.structuredContent as { shades: { shade: number; className: string; value: string }[] }
+      expect(shades).toHaveLength(11)
+      expect(shades[5]).toEqual({ shade: 500, className: 'blue-500', value: 'oklch(62.3% 0.214 259.815)' })
+    })
+
+    it('returns one shade, in hex for older versions', async () => {
+      const result = await call('get_tailwind_palette', { name: 'Slate-500', tailwindVersion: 3 })
+      expect(result.structuredContent).toEqual({
+        name: 'slate',
+        tailwindVersion: 3,
+        shades: [{ shade: 500, className: 'slate-500', value: '#64748b' }],
+      })
+      expect(result.content[0]).toMatchObject({ text: 'Tailwind v3 slate-500:\nslate-500: #64748b' })
+    })
+
+    it.each([
+      [{ name: 'brand' }, 'not a default Tailwind v4 color. Colors: red, orange'],
+      [{ name: 'blue-950', tailwindVersion: 2 }, 'Tailwind v2 has no blue-950'],
+      [{ name: 'constructor' }, 'not a default Tailwind v4 color'],
+    ])('returns an error for %j', async (args, message) => {
+      const result = await call('get_tailwind_palette', args)
+      expect(result.isError).toBe(true)
+      expect(result.content[0]).toMatchObject({ text: expect.stringContaining(message) })
     })
   })
 })

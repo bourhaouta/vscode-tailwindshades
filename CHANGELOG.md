@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+- **MCP server: new `get_tailwind_palette` tool.** It returns Tailwind's own default colors, exactly as Tailwind defines them: a whole color (`blue`) or one shade (`slate-500`), for v4, v3, v2 and v1. Agents use it instead of writing Tailwind's values from memory.
+- **MCP server: `closest_tailwind_color` is now `find_closest_tailwind_color`**, so all tool names start with a verb.
+- **Exact Tailwind values**: the closest-color tool returned some v3 and v1 values 1 off in hex (for example `#39b2ac` for v1 `teal-500`, which is `#38b2ac`), because they were rounded through OKLCH. Tailwind's own strings are now stored next to the OKLCH numbers, and a test checks every value against the Tailwind packages. Generated palettes don't change.
+- The extension itself has no changes in this version.
+
 ## 1.2.0
 
 - **Website**: [tailwindshades.bourhaouta.com](https://tailwindshades.bourhaouta.com) generates palettes in the browser, with a live preview, the Tailwind color it follows and a shareable link.

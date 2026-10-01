@@ -70,7 +70,7 @@ claude mcp add --scope user tailwindshades -- npx -y tailwindshades-mcp
 
 ## Tools
 
-Both tools are read-only.
+All three tools are read-only.
 
 ### `generate_palette`
 
@@ -86,13 +86,17 @@ A full palette from one color, ready to paste.
 
 Returns the code, plus the shades, the shade that holds the input color and the closest Tailwind color as structured data.
 
-### `closest_tailwind_color`
+### `find_closest_tailwind_color`
 
 The Tailwind shade that looks most like a color, e.g. `#db4d53` → `red-500`, with Tailwind's value, the distance, and whether the difference is visible. Agents use it to pick an existing class instead of an arbitrary value, or to decide a custom palette is needed.
 
+### `get_tailwind_palette`
+
+Tailwind's own default colors, exactly as Tailwind defines them: a whole color (`blue`) or one shade (`slate-500`), for Tailwind v4, v3, v2 or v1. Values are `oklch()` in v4 and hex before. Agents use it instead of writing Tailwind's default values from memory.
+
 ## Host it yourself
 
-The package also exports `createServer()`, a fresh `McpServer` with both tools. Serve it with the [MCP TypeScript SDK](https://ts.sdk.modelcontextprotocol.io/v2/), for example over HTTP in any web-standard runtime (this is how the remote server above runs, as a Next.js route):
+The package also exports `createServer()`, a fresh `McpServer` with all three tools. Serve it with the [MCP TypeScript SDK](https://ts.sdk.modelcontextprotocol.io/v2/), for example over HTTP in any web-standard runtime (this is how the remote server above runs, as a Next.js route):
 
 ```ts
 import { createMcpHandler } from '@modelcontextprotocol/server'
