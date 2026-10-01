@@ -3,6 +3,7 @@
   "displayName": "Tailwind Shades",
   "description": "Generate Tailwind CSS color palettes (50–950) from any color, for Tailwind v4, v3, v2 and v1",
   "version": "1.0.0",
+  "private": true,
   "author": "Omar Bourhaouta <bourhaouta@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/bourhaouta/vscode-tailwindshades",
@@ -112,26 +113,25 @@
     }
   },
   "scripts": {
-    "palette": "node scripts/extract-palette.mjs",
+    "palette": "npm run palette -w packages/core",
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/core",
     "test": "vitest run",
     "check": "npm run typecheck && npm test",
     "package": "vsce package --no-dependencies",
     "vscode:prepublish": "npm run build -- --production"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
-    "@types/culori": "^4.0.1",
+    "tailwindshades": "*",
     "@types/node": "^22.20.4",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^4.0.0",
-    "culori": "^4.0.2",
     "esbuild": "^0.28.2",
     "ovsx": "^1.2.0",
-    "tailwindcss": "^4.3.3",
-    "tailwindcss-v1": "npm:tailwindcss@^1.9.6",
-    "tailwindcss-v3": "npm:tailwindcss@^3.4.19",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
   }

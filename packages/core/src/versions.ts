@@ -1,5 +1,5 @@
-import type { ColorFormat } from './palette'
-import { PALETTE_V1, PALETTE_V3, PALETTE_V4, type ReferencePalette } from './tailwind-palette'
+import type { ColorFormat } from './palette.js'
+import { PALETTE_V1, PALETTE_V3, PALETTE_V4, type ReferencePalette } from './tailwind-palette.js'
 
 export type TailwindVersion = 1 | 2 | 3 | 4
 

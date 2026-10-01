@@ -1,5 +1,5 @@
 import { converter, formatHex, formatRgb, parse, toGamut } from 'culori'
-import type { Oklch, ReferencePalette } from './tailwind-palette'
+import type { Oklch, ReferencePalette } from './tailwind-palette.js'
 
 export type ColorFormat = 'oklch' | 'hex' | 'rgb'
 

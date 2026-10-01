@@ -1,0 +1,12 @@
+// Writes the .d.ts files to dist/. The JS comes from scripts/build.mjs.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
