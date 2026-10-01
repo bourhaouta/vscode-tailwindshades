@@ -10,7 +10,7 @@ import { VERSIONS } from '../src/versions'
 describe('createPalette', () => {
   it('keeps the input color at its best-fit shade', () => {
     const result = createPalette({ color: '#db4d53', name: 'brand' })
-    expect(result).toMatchObject({ version: 4, format: 'oklch', output: 'theme', family: 'red', anchor: 400 })
+    expect(result).toMatchObject({ version: 4, format: 'oklch', output: 'theme', family: 'red', anchor: 500 })
     expect(result.shades).toHaveLength(11)
   })
 
@@ -48,7 +48,7 @@ describe('runCli', () => {
     const { code, stdout, stderr } = runCli(['#db4d53', '--name', 'brand'])
     expect(code).toBe(0)
     expect(stdout).toBe(`${createPalette({ color: '#db4d53', name: 'brand' }).text}\n`)
-    expect(stderr).toBe('brand-50 to brand-950 (Tailwind v4), your color is brand-400\n')
+    expect(stderr).toBe('brand-50 to brand-950 (Tailwind v4), your color is brand-500\n')
   })
 
   it('reads the version, format and output options', () => {

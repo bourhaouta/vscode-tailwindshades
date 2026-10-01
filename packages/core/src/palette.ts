@@ -71,8 +71,15 @@ export function closestTailwindShade(
  * at its closest shade.
  */
 export function generatePalette(color: Color, reference: ReferencePalette): Palette {
-  const { family, index: anchor } = closestTailwindShade(color, reference)
+  // The family comes from the default match (hue first). Inside it, the shade
+  // that looks the same keeps the lightness shift, and so the curve's bend, small.
+  const { family } = closestTailwindShade(color, reference)
   const curve = reference.colors[family]
+  const { index: anchor } = closestTailwindShade(
+    color,
+    { shades: reference.shades, colors: { [family]: curve } },
+    { lightnessWeight: 1 },
+  )
   const [refL, refC, refH] = curve[anchor]
   const last = curve.length - 1
 

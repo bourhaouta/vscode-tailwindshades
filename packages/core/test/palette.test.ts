@@ -46,6 +46,28 @@ describe('generatePalette', () => {
     }
   })
 
+  it.each([
+    ['v4', PALETTE_V4],
+    ['v3', PALETTE_V3],
+    ['v1', PALETTE_V1],
+  ])('puts every stock %s color at its own shade', (_, reference) => {
+    for (const shades of Object.values(reference.colors)) {
+      shades.forEach((shade, index) => {
+        // Very light and dark shades of different colors look alike; only colorful shades must match
+        if (shade[1] < 0.05) return
+        expect(generatePalette(toColor(shade), reference).anchor).toBe(reference.shades[index])
+      })
+    }
+  })
+
+  it('puts a color at the shade with the closest lightness, not the closest chroma', () => {
+    // Close to red-500 in lightness, but less colorful (closer to red-400 in chroma)
+    expect(generatePalette(parseColor('#db4d53')!, VERSIONS[4].reference).anchor).toBe(500)
+    // Tailwind v3 violet-600: same lightness as v4 violet-600
+    const violet = generatePalette(parseColor('#7c3aed')!, VERSIONS[4].reference)
+    expect([violet.family, violet.anchor]).toEqual(['violet', 600])
+  })
+
   it('uses the shade names of each version', () => {
     const color = parseColor('#8b5cf6')!
     expect(generatePalette(color, VERSIONS[4].reference).shades.map((s) => s.shade)).toEqual([

@@ -43,17 +43,17 @@ describe('tailwindshades-mcp', () => {
         tailwindVersion: 4,
         format: 'oklch',
         output: 'theme',
-        inputShade: 400,
+        inputShade: 500,
         closestTailwindColor: 'red',
       })
       expect(result.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining(expected.text) })
-      expect(result.content[0]).toMatchObject({ text: expect.stringContaining('The input color is brand-400.') })
+      expect(result.content[0]).toMatchObject({ text: expect.stringContaining('The input color is brand-500.') })
     })
 
     it('keeps the input color exactly at its shade', async () => {
       const result = await call('generate_palette', { color: '#db4d53', format: 'hex' })
       const { shades } = result.structuredContent as { shades: { shade: number; value: string }[] }
-      expect(shades.find(({ shade }) => shade === 400)?.value).toBe('#db4d53')
+      expect(shades.find(({ shade }) => shade === 500)?.value).toBe('#db4d53')
     })
 
     it('reads the version, format and output options', async () => {
@@ -98,8 +98,7 @@ describe('tailwindshades-mcp', () => {
       expect(result.content[0]).toMatchObject({ text: expect.stringContaining('good replacement') })
     })
 
-    it('finds the shade that looks closest, not the palette anchor', async () => {
-      // The palette for #db4d53 follows red with the color at 400, but red-500 looks closer
+    it('finds the closest shade of a custom color', async () => {
       const result = await call('closest_tailwind_color', { color: '#db4d53' })
       expect(result.structuredContent).toMatchObject({
         className: 'red-500',

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Better shade fit**: your color now goes to the shade with the closest lightness in its Tailwind color, so the palette follows Tailwind's light-to-dark steps more closely. For example, `#db4d53` is now `500` in v4 (was `400`), and Tailwind v3's `violet-600` stays `600` in v4 (was `500`). Most colors don't change.
+
 ## 1.0.0
 
 A full update for modern Tailwind CSS.

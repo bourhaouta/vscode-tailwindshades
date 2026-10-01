@@ -18,17 +18,17 @@ With no color under the cursor, the extension asks you for one.
 
 ```css
 @theme {
-  --color-brand-50: oklch(97.1% 0.012 16.784);
-  --color-brand-100: oklch(91.4% 0.03 17.121);
-  --color-brand-200: oklch(84.1% 0.058 17.738);
-  --color-brand-300: oklch(74.2% 0.106 18.975);
-  --color-brand-400: oklch(61.6% 0.177 21.62);
-  --color-brand-500: oklch(56.4% 0.22 24.735);
-  --color-brand-600: oklch(51.8% 0.228 26.729);
-  --color-brand-700: oklch(46.1% 0.198 26.922);
-  --color-brand-800: oklch(41.5% 0.164 26.303);
-  --color-brand-900: oklch(38.1% 0.131 25.127);
-  --color-brand-950: oklch(25.8% 0.085 25.446);
+  --color-brand-50: oklch(97.1% 0.01 13.669);
+  --color-brand-100: oklch(93.2% 0.024 14.006);
+  --color-brand-200: oklch(87.7% 0.046 14.623);
+  --color-brand-300: oklch(79.5% 0.085 15.86);
+  --color-brand-400: oklch(68.7% 0.143 18.505);
+  --color-brand-500: oklch(61.6% 0.177 21.62);
+  --color-brand-600: oklch(56% 0.183 23.614);
+  --color-brand-700: oklch(49.2% 0.159 23.807);
+  --color-brand-800: oklch(43.6% 0.133 23.188);
+  --color-brand-900: oklch(39.2% 0.106 22.012);
+  --color-brand-950: oklch(25.8% 0.069 22.331);
 }
 ```
 
