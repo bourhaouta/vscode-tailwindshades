@@ -22,6 +22,10 @@ afterAll(() => client.close())
 const call = (name: string, args: Record<string, unknown>) => client.callTool({ name, arguments: args })
 
 describe('tailwindshades-mcp', () => {
+  it('tells agents when to use the tools', () => {
+    expect(client.getInstructions()).toContain('call generate_palette')
+  })
+
   it('lists the tools as read-only', async () => {
     const { tools } = await client.listTools()
     expect(tools.map((tool) => tool.name).sort()).toEqual(['closest_tailwind_color', 'generate_palette'])

@@ -43,7 +43,19 @@ function parse(input: string) {
 }
 
 export function createServer(): McpServer {
-  const server = new McpServer({ name: 'tailwindshades', version })
+  const server = new McpServer(
+    { name: 'tailwindshades', version },
+    {
+      // Sent to the agent when it connects, so it knows when to use the tools
+      instructions:
+        'Use these tools whenever you add or change a color in a Tailwind CSS project. ' +
+        'Tailwind colors are palettes with shades (50-950), so utilities like bg-brand-500 and ' +
+        'hover:bg-brand-600 work. Never write a single --color-* variable or invent shades by hand: ' +
+        'call generate_palette and paste its code. Match tailwindVersion to the project ' +
+        '(v4: @import "tailwindcss" in CSS; v3 and older: tailwind.config.js). ' +
+        'To replace a hard-coded color with an existing Tailwind class, call closest_tailwind_color.',
+    },
+  )
 
   server.registerTool(
     'generate_palette',
@@ -51,9 +63,10 @@ export function createServer(): McpServer {
       title: 'Generate a Tailwind palette',
       description:
         'Generates a full Tailwind CSS palette (50-950) from one color, ready to paste. ' +
-        'The input color stays exactly at its best-fit shade, and the other shades follow the ' +
-        "curve of the closest Tailwind color, so they look like Tailwind's own. " +
-        'Use this instead of inventing shades when a project needs a custom color like "brand".',
+        'Call it whenever you add a color to a Tailwind theme (e.g. "add a brand color #db4d53"), ' +
+        'instead of writing a single variable or inventing shades. The input color stays exactly ' +
+        'at its best-fit shade, and the other shades follow the closest Tailwind color, so they ' +
+        "look like Tailwind's own.",
       inputSchema: z.object({
         color,
         name: z
