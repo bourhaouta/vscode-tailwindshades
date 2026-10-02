@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- **MCP server: new `list_tailwind_colors` tool**, the names of Tailwind's default colors for a version, with each one's 500 value.
+- **MCP server: new `convert_color` tool**, any CSS color as `oklch()` (what Tailwind v4 uses), hex and rgb.
+- **MCP server: new `add_brand_color` prompt**: add a color with all its shades to the project's theme. Claude Code shows it as a slash command.
+- **MCP server: icon and website** in the server's info and in the MCP Registry entry, so clients and directories can show them.
+- The extension itself has no changes in this version.
+
 ## 1.3.0
 
 - **MCP server: new `get_tailwind_palette` tool.** It returns Tailwind's own default colors, exactly as Tailwind defines them: a whole color (`blue`) or one shade (`slate-500`), for v4, v3, v2 and v1. Agents use it instead of writing Tailwind's values from memory.

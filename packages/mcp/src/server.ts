@@ -59,7 +59,22 @@ function parse(input: string) {
 
 export function createServer(): McpServer {
   const server = new McpServer(
-    { name: 'tailwindshades', version },
+    {
+      name: 'tailwindshades',
+      version,
+      title: 'Tailwind Shades',
+      description: 'Tailwind CSS palettes (50-950) from any color, for Tailwind v4, v3, v2 and v1',
+      websiteUrl: 'https://tailwindshades.bourhaouta.com',
+      // PNG first: every client that shows icons must support it
+      icons: [
+        {
+          src: 'https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/main/media/icon.png',
+          mimeType: 'image/png',
+          sizes: ['256x256'],
+        },
+        { src: 'https://tailwindshades.bourhaouta.com/icon.svg', mimeType: 'image/svg+xml', sizes: ['any'] },
+      ],
+    },
     {
       // Sent to the agent when it connects, so it knows when to use the tools
       instructions:
@@ -70,7 +85,8 @@ export function createServer(): McpServer {
         '(v4: @import "tailwindcss" in CSS; v3 and older: tailwind.config.js). ' +
         'To replace a hard-coded color with an existing Tailwind class, call find_closest_tailwind_color. ' +
         "For Tailwind's own default colors (e.g. the value of slate-500), call get_tailwind_palette " +
-        'instead of writing them from memory.',
+        'instead of writing them from memory; list_tailwind_colors gives the color names. ' +
+        'To turn one color into the oklch() Tailwind v4 uses (or hex or rgb), call convert_color.',
     },
   )
 
@@ -275,6 +291,107 @@ export function createServer(): McpServer {
         structuredContent: structured,
       }
     },
+  )
+
+  server.registerTool(
+    'list_tailwind_colors',
+    {
+      title: "List Tailwind's default colors",
+      description:
+        "Lists the names of Tailwind's default colors for a Tailwind version (e.g. red, slate, mauve " +
+        'in v4), with the shades each one has and its 500 value as a sample. Use it to see which ' +
+        'colors exist before calling get_tailwind_palette or picking a utility class.',
+      inputSchema: z.object({ tailwindVersion }),
+      outputSchema: z.object({
+        tailwindVersion: z.number(),
+        shades: z.array(z.number()).describe('Shades every color has, e.g. 50 to 950'),
+        colors: z.array(
+          z.object({
+            name: z.string().describe('Color name, e.g. "red"'),
+            sample: z.string().describe("Tailwind's 500 value: oklch() in v4, hex in older versions"),
+          }),
+        ),
+      }),
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    },
+    async (input) => {
+      const version = (input.tailwindVersion ?? 4) as TailwindVersion
+      const { reference } = VERSIONS[version]
+      const index = reference.shades.indexOf(500)
+      const colors = Object.entries(reference.values).map(([name, values]) => ({ name, sample: values[index] }))
+      const structured = { tailwindVersion: version, shades: [...reference.shades], colors }
+      return {
+        content: [
+          {
+            type: 'text',
+            text:
+              `${colors.length} default Tailwind v${version} colors, shades ${reference.shades.join(', ')}:\n` +
+              colors.map(({ name, sample }) => `${name} (500: ${sample})`).join('\n'),
+          },
+        ],
+        structuredContent: structured,
+      }
+    },
+  )
+
+  server.registerTool(
+    'convert_color',
+    {
+      title: 'Convert a color',
+      description:
+        'Converts any CSS color to oklch(), hex and rgb, formatted like Tailwind (oklch() is what ' +
+        'Tailwind v4 uses). Colors outside a format are mapped into it: oklch() to Display P3 like ' +
+        "Tailwind's palette, hex and rgb to sRGB. Use it for one value; to add a color with all its " +
+        'shades, call generate_palette instead.',
+      inputSchema: z.object({ color }),
+      outputSchema: z.object({
+        oklch: z.string().describe('e.g. oklch(61.6% 0.177 21.62)'),
+        hex: z.string().describe('e.g. #db4d53'),
+        rgb: z.string().describe('e.g. rgb(219, 77, 83)'),
+      }),
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    },
+    async (input) => {
+      const parsed = parse(input.color)
+      const structured = {
+        oklch: formatColor(parsed, 'oklch'),
+        hex: formatColor(parsed, 'hex'),
+        rgb: formatColor(parsed, 'rgb'),
+      }
+      return {
+        content: [{ type: 'text', text: `${structured.oklch}\n${structured.hex}\n${structured.rgb}` }],
+        structuredContent: structured,
+      }
+    },
+  )
+
+  // A ready-made request: clients like Claude Code show prompts as slash commands
+  server.registerPrompt(
+    'add_brand_color',
+    {
+      title: 'Add a brand color',
+      description: 'Add a color with all its shades (50-950) to the Tailwind theme of this project',
+      argsSchema: z.object({
+        color: z.string().describe('Any CSS color, e.g. #db4d53'),
+        name: z.string().optional().describe('Color name, e.g. brand. Defaults to "brand"'),
+      }),
+    },
+    ({ color, name }) => ({
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text:
+              `Add the color ${color} as "${name || 'brand'}" to this project's Tailwind theme. ` +
+              "First find the project's Tailwind version (v4 has @import \"tailwindcss\" in its CSS; " +
+              'v3 and older have a tailwind.config file). Then call generate_palette with that ' +
+              'tailwindVersion and the name, and paste the code where the theme colors live: the ' +
+              '@theme block for v4, theme.extend.colors in tailwind.config for older versions.',
+          },
+        },
+      ],
+    }),
   )
 
   return server
