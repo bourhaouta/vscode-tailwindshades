@@ -19,7 +19,13 @@ describe('/mcp', () => {
     )
 
     const { tools } = await client.listTools()
-    expect(tools.map((tool) => tool.name).sort()).toEqual(['find_closest_tailwind_color', 'generate_palette', 'get_tailwind_palette'])
+    expect(tools.map((tool) => tool.name).sort()).toEqual([
+      'convert_color',
+      'find_closest_tailwind_color',
+      'generate_palette',
+      'get_tailwind_palette',
+      'list_tailwind_colors',
+    ])
 
     const result = await client.callTool({ name: 'generate_palette', arguments: { color: '#db4d53', name: 'brand' } })
     expect(result.structuredContent).toMatchObject({ name: 'brand', inputShade: 500 })

@@ -4,17 +4,33 @@
   "title": "Tailwind Shades",
   "description": "Tailwind CSS palettes (50-950) from any color, the closest Tailwind color, and Tailwind's defaults",
   "websiteUrl": "https://tailwindshades.bourhaouta.com",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/bourhaouta/vscode-tailwindshades/main/media/icon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "256x256"
+      ]
+    },
+    {
+      "src": "https://tailwindshades.bourhaouta.com/icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+        "any"
+      ]
+    }
+  ],
   "repository": {
     "url": "https://github.com/bourhaouta/vscode-tailwindshades",
     "source": "github",
     "subfolder": "packages/mcp"
   },
-  "version": "1.3.0",
+  "version": "1.4.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "tailwindshades-mcp",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

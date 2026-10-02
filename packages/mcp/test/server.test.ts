@@ -15,6 +15,15 @@ afterAll(() => client.close())
 const call = (name: string, args: Record<string, unknown>) => client.callTool({ name, arguments: args })
 
 describe('tailwindshades-mcp', () => {
+  it('describes itself with a website and icons', () => {
+    expect(client.getServerVersion()).toMatchObject({
+      name: 'tailwindshades',
+      title: 'Tailwind Shades',
+      websiteUrl: 'https://tailwindshades.bourhaouta.com',
+      icons: [{ mimeType: 'image/png', sizes: ['256x256'] }, { mimeType: 'image/svg+xml' }],
+    })
+  })
+
   it('tells agents when to use the tools', () => {
     expect(client.getInstructions()).toContain('call generate_palette')
   })
@@ -22,9 +31,11 @@ describe('tailwindshades-mcp', () => {
   it('lists the tools as read-only', async () => {
     const { tools } = await client.listTools()
     expect(tools.map((tool) => tool.name).sort()).toEqual([
+      'convert_color',
       'find_closest_tailwind_color',
       'generate_palette',
       'get_tailwind_palette',
+      'list_tailwind_colors',
     ])
     for (const tool of tools) {
       expect(tool.description).toBeTruthy()
@@ -181,6 +192,50 @@ describe('tailwindshades-mcp', () => {
       const result = await call('get_tailwind_palette', args)
       expect(result.isError).toBe(true)
       expect(result.content[0]).toMatchObject({ text: expect.stringContaining(message) })
+    })
+  })
+
+  describe('list_tailwind_colors', () => {
+    it('lists the v4 colors with their 500 value', async () => {
+      const result = await call('list_tailwind_colors', {})
+      const { shades, colors } = result.structuredContent as { shades: number[]; colors: { name: string; sample: string }[] }
+      expect(shades).toEqual([50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950])
+      expect(colors).toHaveLength(26)
+      expect(colors).toContainEqual({ name: 'blue', sample: 'oklch(62.3% 0.214 259.815)' })
+      expect(colors.map(({ name }) => name)).toContain('mauve')
+    })
+
+    it('lists the v1 colors in hex', async () => {
+      const result = await call('list_tailwind_colors', { tailwindVersion: 1 })
+      expect(result.structuredContent).toMatchObject({ shades: [100, 200, 300, 400, 500, 600, 700, 800, 900] })
+      expect((result.structuredContent as { colors: unknown[] }).colors).toContainEqual({ name: 'teal', sample: '#38b2ac' })
+    })
+  })
+
+  describe('convert_color', () => {
+    it('converts a color to oklch, hex and rgb', async () => {
+      const result = await call('convert_color', { color: '#db4d53' })
+      expect(result.structuredContent).toEqual({
+        oklch: 'oklch(61.6% 0.177 21.62)',
+        hex: '#db4d53',
+        rgb: 'rgb(219, 77, 83)',
+      })
+    })
+
+    it('returns an error for an invalid color', async () => {
+      const result = await call('convert_color', { color: 'nope' })
+      expect(result.isError).toBe(true)
+    })
+  })
+
+  describe('add_brand_color prompt', () => {
+    it('asks the agent to use generate_palette with the color and name', async () => {
+      const { prompts } = await client.listPrompts()
+      expect(prompts.map(({ name }) => name)).toEqual(['add_brand_color'])
+
+      const { messages } = await client.getPrompt({ name: 'add_brand_color', arguments: { color: '#db4d53', name: 'accent' } })
+      expect(messages[0].content).toMatchObject({ type: 'text', text: expect.stringContaining('#db4d53 as "accent"') })
+      expect(messages[0].content).toMatchObject({ text: expect.stringContaining('generate_palette') })
     })
   })
 })
