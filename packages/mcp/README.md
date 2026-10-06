@@ -1,5 +1,7 @@
 # tailwindshades-mcp
 
+[![Tailwind Shades MCP connector – tool definition quality and endpoint health on Glama](https://glama.ai/mcp/connectors/io.github.bourhaouta/tailwindshades/badges/score.svg)](https://glama.ai/mcp/connectors/io.github.bourhaouta/tailwindshades)
+
 An [MCP](https://modelcontextprotocol.io) server that gives AI agents real [Tailwind CSS](https://tailwindcss.com/) palettes, so they stop guessing shades. Works with **Tailwind v4, v3, v2 and v1**.
 
 Ask your agent *"Add a brand color #db4d53 to my theme"*, and it writes a full `50` to `950` palette in the project's Tailwind format, with `#db4d53` exactly at `brand-500`. Same engine as the [Tailwind Shades](https://marketplace.visualstudio.com/items?itemName=bourhaouta.tailwindshades) editor extension and [tailwindshades.bourhaouta.com](https://tailwindshades.bourhaouta.com).
