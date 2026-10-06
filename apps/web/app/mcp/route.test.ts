@@ -1,6 +1,6 @@
 // Calls the real /mcp route handlers with the MCP SDK client, in-process (no server)
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { DELETE, GET, OPTIONS, POST } from './route'
 
 const handlers: Record<string, (request: Request) => Response | Promise<Response>> = { GET, POST, DELETE, OPTIONS }
@@ -51,5 +51,19 @@ describe('/mcp', () => {
     )
     expect(response.status).toBe(200)
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
+  })
+
+  it('logs the name of each client that connects', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const client = new Client({ name: 'test-client', version: '2.0.0' })
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL('https://tailwindshades.bourhaouta.com/mcp'), { fetch: fetchRoute }),
+    )
+    await client.listTools()
+    await client.close()
+
+    const logged = log.mock.calls.filter(([message]) => message === 'mcp client')
+    expect(logged).toEqual([['mcp client', { client: 'test-client', version: '2.0.0' }]])
+    log.mockRestore()
   })
 })
