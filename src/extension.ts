@@ -20,7 +20,10 @@ import {
 const COLOR_AT_CURSOR =
   /#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\([^)]*\)/i
 
-const OUTPUT_LABELS: Record<Output, string> = {
+// The live and Shopify outputs span several blocks or files, so they are CLI and MCP only
+type EditorOutput = Exclude<Output, 'live' | 'shopify'>
+
+const OUTPUT_LABELS: Record<EditorOutput, string> = {
   theme: 'Tailwind v4 @theme (CSS)',
   config: 'tailwind.config.js object',
   cssVariables: 'CSS variables',
@@ -150,7 +153,7 @@ async function pickVersion(detected: Detected | undefined) {
 }
 
 async function pickOutput(profileOutput: Output) {
-  const items = (Object.keys(OUTPUT_LABELS) as Output[]).map((output) => ({
+  const items = (Object.keys(OUTPUT_LABELS) as EditorOutput[]).map((output) => ({
     label: OUTPUT_LABELS[output],
     description: output === profileOutput ? 'default for this version' : undefined,
     output,

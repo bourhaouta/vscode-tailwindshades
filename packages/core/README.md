@@ -33,11 +33,13 @@ Your color stays exactly as it is, at the shade where it fits best (here `500`).
 | `-n, --name` | letters, digits and dashes | the closest Tailwind color |
 | `-t, --tailwind` | `4`, `3`, `2`, `1` | `4` |
 | `-f, --format` | `oklch`, `hex`, `rgb` | `oklch` for v4, `hex` before |
-| `-o, --output` | `theme`, `config`, `css` | `theme` for v4, `config` before |
+| `-o, --output` | `theme`, `config`, `css`, `live`, `shopify` | `theme` for v4, `config` before |
 
 - `theme`: a v4 `@theme` block for your CSS file
 - `config`: an object for `theme.extend.colors` in `tailwind.config.js`
 - `css`: plain CSS variables (`--brand-500: …;`)
+- `live`: a palette that follows a color picked at runtime (see below)
+- `shopify`: the same, for a Shopify theme where the merchant picks the color
 
 Any CSS color works: `#db4d53`, `db4d53` (no `#` needed, since `#` starts a comment in most shells), `rgb(…)`, `hsl(…)`, `oklch(…)` or a color name. Quote colors with spaces.
 
@@ -48,6 +50,49 @@ npx tailwindshades-cli db4d53 -t 3 -o config >> colors.js
 ```
 
 Without `--name`, the palette uses the closest Tailwind color's name (like `red`), which replaces Tailwind's own palette. The CLI prints a note when that happens.
+
+### Colors picked at runtime
+
+When the color is picked after you ship (by a user, a tenant of a white-label app, a CMS setting), a fixed palette can't follow it. `-o live` writes CSS where every shade follows one variable, `--color-primary`, rebuilt in the browser:
+
+```sh
+npx tailwindshades-cli "#223859" --name primary --output live
+```
+
+It prints:
+
+1. The default `--color-primary` (your color), in `@layer base` so any rule or inline style you set at runtime wins.
+2. An `@theme` block with the palette for the default color, so `bg-primary-500` and the other utilities exist.
+3. An `@supports` block that redefines each shade from `--color-primary` with relative colors, using the same math as the other outputs:
+
+```css
+--color-primary-500: oklch(from var(--color-primary) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
+```
+
+Then set the color on `:root` however you like, e.g. `document.documentElement.style.setProperty('--color-primary', '#1f6f43')`, and every shade follows. The shades are computed on `:root`, so set it there, not on an inner element.
+
+Your color's shade (here `700`) is `var(--color-primary)` itself. The Tailwind color the curve follows and the shade that holds the runtime color are picked from your color when you run the command; the runtime color then moves every shade's lightness, chroma and hue. A color far from yours (another hue, much lighter or darker) still gets a smooth palette, but with your color's curve.
+
+| Option | |
+| --- | --- |
+| `--plain` | A plain `:root` block instead of `@theme`, for projects without Tailwind |
+| `--semantic` | Also writes `--color-primary-foreground`, for text on the color: white or the darkest shade, whichever has more WCAG contrast with the runtime color (black when your color is the darkest shade itself) |
+
+Relative colors work in Chrome and Edge 119+, Safari 18+ and Firefox 128+. Older browsers skip the `@supports` block and keep the static palette for the default color. The live and Shopify outputs need Tailwind v4 (`-t 4`, the default).
+
+### Shopify themes
+
+In a Shopify theme, the merchant picks the brand color in the theme editor. `-o shopify` is the live output, plus what connects it to the theme editor:
+
+```sh
+npx tailwindshades-cli "#223859" --name primary --output shopify
+```
+
+1. A color setting for `config/settings_schema.json`, with your color as the default.
+2. The line for `snippets/css-variables.liquid` (inside `{% style %}`), which turns the setting into `--color-primary`. It uses no Liquid color filters, so the theme editor previews changes live.
+3. The `@theme` and `@supports` blocks of the live output.
+
+`--plain` and `--semantic` work the same way; use `--plain` for themes without Tailwind, like Dawn.
 
 ## Library
 
@@ -71,8 +116,9 @@ palette.shades // [{ shade: 50, value: 'oklch(97.1% 0.01 13.669)' }, …]
 | `name` | the closest Tailwind color |
 | `version` | `4` (also `3`, `2`, `1`) |
 | `format` | `'oklch'` for v4, `'hex'` before (also `'rgb'`) |
-| `output` | `'theme'` for v4, `'config'` before (also `'cssVariables'`) |
+| `output` | `'theme'` for v4, `'config'` before (also `'cssVariables'`, and `'live'` and `'shopify'` for v4) |
 | `indent` | two spaces |
+| `plain`, `semantic` | `false`: the `--plain` and `--semantic` options of the live and Shopify outputs |
 
 It throws on an invalid color or name. ESM only, with TypeScript types.
 

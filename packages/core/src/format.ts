@@ -1,4 +1,5 @@
 import { formatColor, type ColorFormat, type Palette } from './palette.js'
+import { formatLive, formatShopify } from './live.js'
 import type { Output, VersionProfile } from './versions.js'
 
 export type FormatOptions = {
@@ -12,6 +13,10 @@ export type FormatOptions = {
   baseIndent: string
   /** True when the cursor is already inside an `@theme { ... }` block */
   insideTheme?: boolean
+  /** Live and Shopify outputs: a plain `:root` block instead of `@theme`, for projects without Tailwind */
+  plain?: boolean
+  /** Live and Shopify outputs: also write `--color-<name>-foreground` */
+  semantic?: boolean
 }
 
 const CSS_LANGUAGES = ['css', 'scss', 'sass', 'less', 'postcss', 'tailwindcss', 'vue-postcss']
@@ -75,6 +80,13 @@ export function formatPalette(options: FormatOptions): string {
       const key = /^[a-z_$][\w$]*$/i.test(name) ? name : `'${name}'`
       const lines = entries.map(({ shade, value }) => `${indent}${shade}: '${value}',`)
       return [`${key}: {`, ...lines, '},'].join(newline)
+    }
+
+    // Several blocks (or files) of code, so they always start at the beginning of a line
+    case 'live':
+    case 'shopify': {
+      const format = output === 'live' ? formatLive : formatShopify
+      return format({ name, palette, colorFormat, indent, plain: options.plain, semantic: options.semantic })
     }
   }
 }

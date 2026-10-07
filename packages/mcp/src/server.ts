@@ -15,10 +15,12 @@ import * as z from 'zod'
 declare const __VERSION__: string
 const version = __VERSION__
 
-const OUTPUTS: Record<'theme' | 'config' | 'css', Output> = {
+const OUTPUTS: Record<'theme' | 'config' | 'css' | 'live' | 'shopify', Output> = {
   theme: 'theme',
   config: 'config',
   css: 'cssVariables',
+  live: 'live',
+  shopify: 'shopify',
 }
 
 const color = z
@@ -86,7 +88,10 @@ export function createServer(): McpServer {
         'To replace a hard-coded color with an existing Tailwind class, call find_closest_tailwind_color. ' +
         "For Tailwind's own default colors (e.g. the value of slate-500), call get_tailwind_palette " +
         'instead of writing them from memory; list_tailwind_colors gives the color names. ' +
-        'To turn one color into the oklch() Tailwind v4 uses (or hex or rgb), call convert_color.',
+        'To turn one color into the oklch() Tailwind v4 uses (or hex or rgb), call convert_color. ' +
+        'When the color is picked at runtime (by a user, a tenant or a CMS setting), call generate_palette ' +
+        'with output "live": every shade then follows one CSS variable. For Shopify themes, where the ' +
+        'merchant picks the color in the theme editor, use output "shopify".',
     },
   )
 
@@ -117,12 +122,29 @@ export function createServer(): McpServer {
           .optional()
           .describe('Color format. Defaults to oklch for v4 and hex for older versions'),
         output: z
-          .enum(['theme', 'config', 'css'])
+          .enum(['theme', 'config', 'css', 'live', 'shopify'])
           .optional()
           .describe(
             'theme: a v4 @theme block for the main CSS file. config: an object for ' +
               'theme.extend.colors in tailwind.config.js. css: plain CSS variables. ' +
+              'live (v4 only): for a color picked at runtime (user, tenant or CMS setting): CSS where ' +
+              'every shade follows one variable, --color-<name>, rebuilt in the browser with relative ' +
+              'colors, with this palette as the fallback. ' +
+              'shopify (v4 only): live, plus a settings_schema.json color setting and the Liquid line for ' +
+              'snippets/css-variables.liquid, for Shopify themes where the merchant picks the color in the ' +
+              'theme editor. Each part says which file it goes in. ' +
               'Defaults to theme for v4 and config for older versions',
+          ),
+        plain: z
+          .boolean()
+          .optional()
+          .describe('With output live or shopify: a plain :root block instead of @theme, for projects without Tailwind (like the Dawn theme)'),
+        semantic: z
+          .boolean()
+          .optional()
+          .describe(
+            'With output live or shopify: also add --color-<name>-foreground for text on the color: ' +
+              'white or the darkest shade, whichever contrasts more, following the runtime color',
           ),
       }),
       outputSchema: z.object({
@@ -147,6 +169,8 @@ export function createServer(): McpServer {
         version: input.tailwindVersion as TailwindVersion | undefined,
         format: input.format,
         output: input.output && OUTPUTS[input.output],
+        plain: input.plain,
+        semantic: input.semantic,
       })
       const output = Object.entries(OUTPUTS).find(([, value]) => value === result.output)![0]
       const structured = {
@@ -164,6 +188,9 @@ export function createServer(): McpServer {
       const summary =
         `${name}-${shades[0].shade} to ${name}-${shades.at(-1)!.shade} for Tailwind v${result.version}. ` +
         `The input color is ${name}-${anchor}.` +
+        (result.output === 'live' || result.output === 'shopify'
+          ? ' The code has several parts; paste each one where its comment says.'
+          : '') +
         (structured.replacesTailwindColor
           ? ` Warning: this replaces Tailwind's own ${name} palette, so every ${name}-* class ` +
             'in the project changes. Unless the user wants that, call again with a name like "brand".'

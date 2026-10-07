@@ -84,7 +84,10 @@ A full palette from one color, ready to paste.
 | `name` | the closest Tailwind color, which replaces Tailwind's own palette, so the tool warns |
 | `tailwindVersion` | `4` (also `3`, `2`, `1`) |
 | `format` | `oklch` for v4, `hex` before (also `rgb`) |
-| `output` | `theme` for v4, `config` before (also `css`) |
+| `output` | `theme` for v4, `config` before (also `css`, and `live` and `shopify` for v4) |
+| `plain`, `semantic` | `false`: with `live` or `shopify`, a plain `:root` block instead of `@theme`, and a `--color-<name>-foreground` |
+
+`live` is for colors picked at runtime (a user, a tenant, a CMS setting): CSS where every shade follows one variable, rebuilt in the browser. `shopify` adds the color setting and Liquid line for Shopify themes, where the merchant picks the color in the theme editor. See [Colors picked at runtime](../core#colors-picked-at-runtime).
 
 Returns the code, plus the shades, the shade that holds the input color and the closest Tailwind color as structured data.
 
