@@ -102,15 +102,29 @@ function channelExpressions(curve: PaletteCurve): [string, string, string][] {
 }
 
 /**
+ * `var(--color-<name>, <fallback>)`: with a fallback, the formulas still work
+ * when nothing sets the variable (otherwise every shade would be invalid, and
+ * the @supports block would still hide the static palette)
+ */
+const variable = (name: string, fallback?: string) =>
+  fallback === undefined ? `var(--color-${name})` : `var(--color-${name}, ${fallback})`
+
+/**
  * The relative color for each shade: `oklch(from var(--color-<name>) L C H)`,
  * which rebuilds the palette in the browser from whatever color the variable
- * holds. The anchor shade is the variable itself.
+ * holds. The anchor shade is the variable itself. `fallback` is the color to
+ * use while the variable is not set.
  */
-export function relativeShades(name: string, curve: PaletteCurve): { shade: number; value: string }[] {
+export function relativeShades(
+  name: string,
+  curve: PaletteCurve,
+  fallback?: string,
+): { shade: number; value: string }[] {
   const channels = channelExpressions(curve)
+  const source = variable(name, fallback)
   return curve.shades.map(({ shade }, index) => ({
     shade,
-    value: index === curve.anchor ? `var(--color-${name})` : `oklch(from var(--color-${name}) ${channels[index].join(' ')})`,
+    value: index === curve.anchor ? source : `oklch(from ${source} ${channels[index].join(' ')})`,
   }))
 }
 
@@ -174,10 +188,20 @@ export function foregroundThreshold(palette: Palette): number {
  * on light ones, switched on the color's WCAG luminance.
  * `clamp(0, (Y - threshold) * 10000, 1)` is the switch.
  */
-export function relativeForeground(name: string, palette: Palette): string {
+export function relativeForeground(name: string, palette: Palette, fallback?: string): string {
   const [l, c, h] = anchoredLast(palette) ? ['0', '0', 'h'] : channelExpressions(palette.curve).at(-1)!
   const darker = `clamp(0, (${luminanceExpression()} - ${number(foregroundThreshold(palette))}) * 10000, 1)`
-  return `oklch(from var(--color-${name}) calc(1 + ${darker} * (${l} - 1)) calc(${darker} * ${c}) ${h})`
+  return `oklch(from ${variable(name, fallback)} calc(1 + ${darker} * (${l} - 1)) calc(${darker} * ${c}) ${h})`
+}
+
+/**
+ * The input color, exact: hex when it fits in sRGB, otherwise oklch() without
+ * the gamut mapping of formatColor, so the shades follow the color itself
+ */
+function defaultColor(palette: Palette): string {
+  const input = palette.shades.find(({ shade }) => shade === palette.anchor)!.color
+  if (displayable({ mode: 'oklch', ...input })) return formatColor(input, 'hex')
+  return `oklch(${number(input.l * 100)}% ${number(input.c)} ${number(input.h ?? 0)})`
 }
 
 /** The static palette and the `@supports` block that rebuilds it from `--color-<name>` */
@@ -188,8 +212,13 @@ function paletteParts(options: LiveOptions): string[] {
     return [`${pad}${selector} {`, ...lines.map((line) => `${pad}${indent}${line}`), `${pad}}`]
   }
 
+  const color = defaultColor(palette)
   const fallback = palette.shades.map(({ shade, color }) => `--color-${name}-${shade}: ${formatColor(color, colorFormat)};`)
-  const live = relativeShades(name, palette.curve).map(({ shade, value }) => `--color-${name}-${shade}: ${value};`)
+  // The default must lose to any rule or inline style that sets the variable, whatever their order:
+  // in @theme (Tailwind's lowest layer, and a free bg-<name> utility), or without Tailwind in a layer
+  const layered = plain ? ['@layer base {', ...block(':root', [`--color-${name}: ${color};`], 1), '}'] : []
+  if (!plain) fallback.unshift(`--color-${name}: ${color};`)
+  const live = relativeShades(name, palette.curve, color).map(({ shade, value }) => `--color-${name}-${shade}: ${value};`)
   const foreground: string[] = []
   if (semantic) {
     const shade = foregroundShade(palette)
@@ -200,15 +229,17 @@ function paletteParts(options: LiveOptions): string[] {
       '',
       `/* The same file: the foreground for --color-${name} (also needs pow() and cos()) */`,
       '@supports (color: oklch(from red calc(pow(l, 1) * cos(h * 1deg)) c h)) {',
-      ...block(':root', [`--color-${name}-foreground: ${relativeForeground(name, palette)};`], 1),
+      ...block(':root', [`--color-${name}-foreground: ${relativeForeground(name, palette, color)};`], 1),
       '}',
     )
   }
 
   return [
+    // The default goes under this label too, so it isn't mistaken for part of another file's code
     plain
-      ? '/* Your stylesheet: the palette for the default color */'
+      ? '/* Your stylesheet: the default color (in a layer, so any rule that sets it wins) and its palette */'
       : '/* Your Tailwind CSS file, after @import "tailwindcss": the palette for the default color */',
+    ...layered,
     ...block(plain ? ':root' : '@theme', fallback),
     '',
     `/* The same file: rebuilds the palette from --color-${name} (relative colors; other browsers keep the palette above) */`,
@@ -225,19 +256,8 @@ function paletteParts(options: LiveOptions): string[] {
  * shade from it with relative colors; older browsers use the static palette.
  */
 export function formatLive(options: LiveOptions): string {
-  const { name, palette, colorFormat, indent } = options
-  const input = palette.shades.find(({ shade }) => shade === palette.anchor)!.color
-  // Hex keeps an sRGB color exact; the other formats round it a little
-  const exact = displayable({ mode: 'oklch', ...input }) ? 'hex' : colorFormat
   return [
-    `/* The color to follow: set --color-${name} on :root at runtime (inline style, JS or any later rule) */`,
-    // In a layer, so any unlayered rule or inline style wins over the default
-    '@layer base {',
-    `${indent}:root {`,
-    `${indent}${indent}--color-${name}: ${formatColor(input, exact)};`,
-    `${indent}}`,
-    '}',
-    '',
+    `/* Set --color-${options.name} on :root at runtime (inline style, JS or a CSS rule): every shade follows it */`,
     ...paletteParts(options),
   ].join('\n')
 }

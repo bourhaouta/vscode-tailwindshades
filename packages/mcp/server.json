@@ -25,12 +25,12 @@
     "source": "github",
     "subfolder": "packages/mcp"
   },
-  "version": "1.5.0",
+  "version": "1.5.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "tailwindshades-mcp",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

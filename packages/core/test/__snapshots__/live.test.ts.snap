@@ -14,6 +14,7 @@ exports[`runCli -o live and -o shopify > prints the Shopify theme code 1`] = `
 
 /* Your Tailwind CSS file, after @import "tailwindcss": the palette for the default color */
 @theme {
+  --color-primary: #223859;
   --color-primary-50: oklch(98.4% 0.004 248.85);
   --color-primary-100: oklch(96.3% 0.01 248.888);
   --color-primary-200: oklch(92% 0.019 256.5);
@@ -30,32 +31,27 @@ exports[`runCli -o live and -o shopify > prints the Shopify theme code 1`] = `
 /* The same file: rebuilds the palette from --color-primary (relative colors; other browsers keep the palette above) */
 @supports (color: oklch(from red l c h)) {
   :root {
-    --color-primary-50: oklch(from var(--color-primary) 0.984 calc(min(c, 0.132) * 0.0682) calc(h - 9.429));
-    --color-primary-100: oklch(from var(--color-primary) min(0.979, 0.1429 * l + 0.9149) calc(min(c, 0.132) * 0.1591) calc(h - 9.391));
-    --color-primary-200: oklch(from var(--color-primary) min(0.974, 0.1429 * l + 0.9099, 0.2857 * l + 0.8227) calc(min(c, 0.132) * 0.2955) calc(h - 1.779));
-    --color-primary-300: oklch(from var(--color-primary) min(0.969, 0.1429 * l + 0.9049, 0.2857 * l + 0.8177, 0.4286 * l + 0.7096) calc(min(c, 0.132) * 0.5) calc(h - 4.393));
-    --color-primary-400: oklch(from var(--color-primary) min(0.964, 0.1429 * l + 0.8999, 0.5714 * l + 0.4914) calc(min(c, 0.132) * 0.9091) calc(h - 0.499));
-    --color-primary-500: oklch(from var(--color-primary) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
-    --color-primary-600: oklch(from var(--color-primary) min(0.954, 0.8571 * l + 0.1271) calc(min(c, 0.132) * 0.9773) calc(h - 0.006));
-    --color-primary-700: var(--color-primary);
-    --color-primary-800: oklch(from var(--color-primary) max(0, min(l - 0.005, 0.6667 * l + 0.031)) calc(min(c, 0.132) * 0.9318) calc(h + 2.744));
-    --color-primary-900: oklch(from var(--color-primary) max(0, min(l - 0.01, 0.6667 * l + 0.026, 0.3333 * l + 0.084)) calc(min(c, 0.132) * 0.9545) calc(h + 8.468));
-    --color-primary-950: oklch(from var(--color-primary) max(0, min(l - 0.015, 0.6667 * l + 0.021, 0.3333 * l + 0.079, 0.129)) calc(min(c, 0.132) * 0.9545) calc(h + 7.408));
+    --color-primary-50: oklch(from var(--color-primary, #223859) 0.984 calc(min(c, 0.132) * 0.0682) calc(h - 9.429));
+    --color-primary-100: oklch(from var(--color-primary, #223859) min(0.979, 0.1429 * l + 0.9149) calc(min(c, 0.132) * 0.1591) calc(h - 9.391));
+    --color-primary-200: oklch(from var(--color-primary, #223859) min(0.974, 0.1429 * l + 0.9099, 0.2857 * l + 0.8227) calc(min(c, 0.132) * 0.2955) calc(h - 1.779));
+    --color-primary-300: oklch(from var(--color-primary, #223859) min(0.969, 0.1429 * l + 0.9049, 0.2857 * l + 0.8177, 0.4286 * l + 0.7096) calc(min(c, 0.132) * 0.5) calc(h - 4.393));
+    --color-primary-400: oklch(from var(--color-primary, #223859) min(0.964, 0.1429 * l + 0.8999, 0.5714 * l + 0.4914) calc(min(c, 0.132) * 0.9091) calc(h - 0.499));
+    --color-primary-500: oklch(from var(--color-primary, #223859) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
+    --color-primary-600: oklch(from var(--color-primary, #223859) min(0.954, 0.8571 * l + 0.1271) calc(min(c, 0.132) * 0.9773) calc(h - 0.006));
+    --color-primary-700: var(--color-primary, #223859);
+    --color-primary-800: oklch(from var(--color-primary, #223859) max(0, min(l - 0.005, 0.6667 * l + 0.031)) calc(min(c, 0.132) * 0.9318) calc(h + 2.744));
+    --color-primary-900: oklch(from var(--color-primary, #223859) max(0, min(l - 0.01, 0.6667 * l + 0.026, 0.3333 * l + 0.084)) calc(min(c, 0.132) * 0.9545) calc(h + 8.468));
+    --color-primary-950: oklch(from var(--color-primary, #223859) max(0, min(l - 0.015, 0.6667 * l + 0.021, 0.3333 * l + 0.079, 0.129)) calc(min(c, 0.132) * 0.9545) calc(h + 7.408));
   }
 }
 "
 `;
 
 exports[`runCli -o live and -o shopify > prints the live palette code 1`] = `
-"/* The color to follow: set --color-primary on :root at runtime (inline style, JS or any later rule) */
-@layer base {
-  :root {
-    --color-primary: #223859;
-  }
-}
-
+"/* Set --color-primary on :root at runtime (inline style, JS or a CSS rule): every shade follows it */
 /* Your Tailwind CSS file, after @import "tailwindcss": the palette for the default color */
 @theme {
+  --color-primary: #223859;
   --color-primary-50: oklch(98.4% 0.004 248.85);
   --color-primary-100: oklch(96.3% 0.01 248.888);
   --color-primary-200: oklch(92% 0.019 256.5);
@@ -73,24 +69,24 @@ exports[`runCli -o live and -o shopify > prints the live palette code 1`] = `
 /* The same file: rebuilds the palette from --color-primary (relative colors; other browsers keep the palette above) */
 @supports (color: oklch(from red l c h)) {
   :root {
-    --color-primary-50: oklch(from var(--color-primary) 0.984 calc(min(c, 0.132) * 0.0682) calc(h - 9.429));
-    --color-primary-100: oklch(from var(--color-primary) min(0.979, 0.1429 * l + 0.9149) calc(min(c, 0.132) * 0.1591) calc(h - 9.391));
-    --color-primary-200: oklch(from var(--color-primary) min(0.974, 0.1429 * l + 0.9099, 0.2857 * l + 0.8227) calc(min(c, 0.132) * 0.2955) calc(h - 1.779));
-    --color-primary-300: oklch(from var(--color-primary) min(0.969, 0.1429 * l + 0.9049, 0.2857 * l + 0.8177, 0.4286 * l + 0.7096) calc(min(c, 0.132) * 0.5) calc(h - 4.393));
-    --color-primary-400: oklch(from var(--color-primary) min(0.964, 0.1429 * l + 0.8999, 0.5714 * l + 0.4914) calc(min(c, 0.132) * 0.9091) calc(h - 0.499));
-    --color-primary-500: oklch(from var(--color-primary) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
-    --color-primary-600: oklch(from var(--color-primary) min(0.954, 0.8571 * l + 0.1271) calc(min(c, 0.132) * 0.9773) calc(h - 0.006));
-    --color-primary-700: var(--color-primary);
-    --color-primary-800: oklch(from var(--color-primary) max(0, min(l - 0.005, 0.6667 * l + 0.031)) calc(min(c, 0.132) * 0.9318) calc(h + 2.744));
-    --color-primary-900: oklch(from var(--color-primary) max(0, min(l - 0.01, 0.6667 * l + 0.026, 0.3333 * l + 0.084)) calc(min(c, 0.132) * 0.9545) calc(h + 8.468));
-    --color-primary-950: oklch(from var(--color-primary) max(0, min(l - 0.015, 0.6667 * l + 0.021, 0.3333 * l + 0.079, 0.129)) calc(min(c, 0.132) * 0.9545) calc(h + 7.408));
+    --color-primary-50: oklch(from var(--color-primary, #223859) 0.984 calc(min(c, 0.132) * 0.0682) calc(h - 9.429));
+    --color-primary-100: oklch(from var(--color-primary, #223859) min(0.979, 0.1429 * l + 0.9149) calc(min(c, 0.132) * 0.1591) calc(h - 9.391));
+    --color-primary-200: oklch(from var(--color-primary, #223859) min(0.974, 0.1429 * l + 0.9099, 0.2857 * l + 0.8227) calc(min(c, 0.132) * 0.2955) calc(h - 1.779));
+    --color-primary-300: oklch(from var(--color-primary, #223859) min(0.969, 0.1429 * l + 0.9049, 0.2857 * l + 0.8177, 0.4286 * l + 0.7096) calc(min(c, 0.132) * 0.5) calc(h - 4.393));
+    --color-primary-400: oklch(from var(--color-primary, #223859) min(0.964, 0.1429 * l + 0.8999, 0.5714 * l + 0.4914) calc(min(c, 0.132) * 0.9091) calc(h - 0.499));
+    --color-primary-500: oklch(from var(--color-primary, #223859) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
+    --color-primary-600: oklch(from var(--color-primary, #223859) min(0.954, 0.8571 * l + 0.1271) calc(min(c, 0.132) * 0.9773) calc(h - 0.006));
+    --color-primary-700: var(--color-primary, #223859);
+    --color-primary-800: oklch(from var(--color-primary, #223859) max(0, min(l - 0.005, 0.6667 * l + 0.031)) calc(min(c, 0.132) * 0.9318) calc(h + 2.744));
+    --color-primary-900: oklch(from var(--color-primary, #223859) max(0, min(l - 0.01, 0.6667 * l + 0.026, 0.3333 * l + 0.084)) calc(min(c, 0.132) * 0.9545) calc(h + 8.468));
+    --color-primary-950: oklch(from var(--color-primary, #223859) max(0, min(l - 0.015, 0.6667 * l + 0.021, 0.3333 * l + 0.079, 0.129)) calc(min(c, 0.132) * 0.9545) calc(h + 7.408));
   }
 }
 
 /* The same file: the foreground for --color-primary (also needs pow() and cos()) */
 @supports (color: oklch(from red calc(pow(l, 1) * cos(h * 1deg)) c h)) {
   :root {
-    --color-primary-foreground: oklch(from var(--color-primary) calc(1 + clamp(0, (-0.0408 * pow(l + 0.3963 * c * cos(h * 1deg) + 0.2158 * c * sin(h * 1deg), 3) + 1.1125 * pow(l - 0.1056 * c * cos(h * 1deg) - 0.0639 * c * sin(h * 1deg), 3) - 0.0717 * pow(l - 0.0895 * c * cos(h * 1deg) - 1.2915 * c * sin(h * 1deg), 3) - 0.1835) * 10000, 1) * (max(0, min(l - 0.015, 0.6667 * l + 0.021, 0.3333 * l + 0.079, 0.129)) - 1)) calc(clamp(0, (-0.0408 * pow(l + 0.3963 * c * cos(h * 1deg) + 0.2158 * c * sin(h * 1deg), 3) + 1.1125 * pow(l - 0.1056 * c * cos(h * 1deg) - 0.0639 * c * sin(h * 1deg), 3) - 0.0717 * pow(l - 0.0895 * c * cos(h * 1deg) - 1.2915 * c * sin(h * 1deg), 3) - 0.1835) * 10000, 1) * calc(min(c, 0.132) * 0.9545)) calc(h + 7.408));
+    --color-primary-foreground: oklch(from var(--color-primary, #223859) calc(1 + clamp(0, (-0.0408 * pow(l + 0.3963 * c * cos(h * 1deg) + 0.2158 * c * sin(h * 1deg), 3) + 1.1125 * pow(l - 0.1056 * c * cos(h * 1deg) - 0.0639 * c * sin(h * 1deg), 3) - 0.0717 * pow(l - 0.0895 * c * cos(h * 1deg) - 1.2915 * c * sin(h * 1deg), 3) - 0.1835) * 10000, 1) * (max(0, min(l - 0.015, 0.6667 * l + 0.021, 0.3333 * l + 0.079, 0.129)) - 1)) calc(clamp(0, (-0.0408 * pow(l + 0.3963 * c * cos(h * 1deg) + 0.2158 * c * sin(h * 1deg), 3) + 1.1125 * pow(l - 0.1056 * c * cos(h * 1deg) - 0.0639 * c * sin(h * 1deg), 3) - 0.0717 * pow(l - 0.0895 * c * cos(h * 1deg) - 1.2915 * c * sin(h * 1deg), 3) - 0.1835) * 10000, 1) * calc(min(c, 0.132) * 0.9545)) calc(h + 7.408));
   }
 }
 "

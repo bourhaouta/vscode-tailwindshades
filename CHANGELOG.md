@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.1
+
+- **Live and Shopify outputs: the palette no longer breaks when nothing sets `--color-<name>`.** Every formula now has your color as its `var()` fallback, so pasting only part of the code (like the `@supports` block, without the Liquid line or the default) gives the default palette instead of empty shades. The default `--color-<name>` now lives in `@theme`, which also adds a `bg-<name>` utility, instead of a separate `@layer base` block (which `--plain` keeps).
+- The extension itself has no changes in this version.
+
 ## 1.5.0
 
 - **CLI and MCP server: new `live` output** (`-o live`), for colors picked at runtime (a user, a tenant, a CMS setting). Every shade follows one CSS variable, rebuilt in the browser with relative colors (Chrome 119+, Safari 18+, Firefox 128+), with an `@theme` palette for the default color as the fallback. `--plain` writes a `:root` block for projects without Tailwind, and `--semantic` adds a `foreground` color that switches between white and the darkest shade by WCAG contrast with the runtime color. Tailwind v4 only.
