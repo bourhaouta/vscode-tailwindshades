@@ -216,9 +216,7 @@ function paletteParts(options: LiveOptions): string[] {
   const fallback = palette.shades.map(({ shade, color }) => `--color-${name}-${shade}: ${formatColor(color, colorFormat)};`)
   // The default must lose to any rule or inline style that sets the variable, whatever their order:
   // in @theme (Tailwind's lowest layer, and a free bg-<name> utility), or without Tailwind in a layer
-  const layered = plain
-    ? ['@layer base {', ...block(':root', [`--color-${name}: ${color};`], 1), '}', '']
-    : []
+  const layered = plain ? ['@layer base {', ...block(':root', [`--color-${name}: ${color};`], 1), '}'] : []
   if (!plain) fallback.unshift(`--color-${name}: ${color};`)
   const live = relativeShades(name, palette.curve, color).map(({ shade, value }) => `--color-${name}-${shade}: ${value};`)
   const foreground: string[] = []
@@ -237,10 +235,11 @@ function paletteParts(options: LiveOptions): string[] {
   }
 
   return [
-    ...layered,
+    // The default goes under this label too, so it isn't mistaken for part of another file's code
     plain
-      ? '/* Your stylesheet: the palette for the default color */'
+      ? '/* Your stylesheet: the default color (in a layer, so any rule that sets it wins) and its palette */'
       : '/* Your Tailwind CSS file, after @import "tailwindcss": the palette for the default color */',
+    ...layered,
     ...block(plain ? ':root' : '@theme', fallback),
     '',
     `/* The same file: rebuilds the palette from --color-${name} (relative colors; other browsers keep the palette above) */`,

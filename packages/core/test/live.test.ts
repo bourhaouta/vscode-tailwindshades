@@ -332,6 +332,10 @@ describe('live and Shopify outputs', () => {
     const plain = live('#223859', { plain: true }).text
     expect(plain).toMatch(/\n@layer base \{\n {2}:root \{\n {4}--color-primary: #223859;\n {2}\}\n\}\n/)
     expect(plain.match(/--color-primary: /g)).toHaveLength(1)
+    // Under the stylesheet's label, not right after the Liquid line
+    const theme = shopify('#223859', { plain: true }).text
+    expect(theme).toContain('--color-primary: {{ settings.color_primary }};\n\n/* Your stylesheet: ')
+    expect(theme.indexOf('@layer base')).toBeGreaterThan(theme.indexOf('/* Your stylesheet: '))
     expect(liveShades(plain).get(700)).toBe('var(--color-primary, #223859)')
   })
 
