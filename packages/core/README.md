@@ -61,17 +61,18 @@ npx tailwindshades-cli "#223859" --name primary --output live
 
 It prints:
 
-1. The default `--color-primary` (your color), in `@layer base` so any rule or inline style you set at runtime wins.
-2. An `@theme` block with the palette for the default color, so `bg-primary-500` and the other utilities exist.
-3. An `@supports` block that redefines each shade from `--color-primary` with relative colors, using the same math as the other outputs:
+1. An `@theme` block with your color as `--color-primary` and the palette for it, so `bg-primary`, `bg-primary-500` and the other utilities exist. Being in `@theme`, the default loses to any rule or inline style that sets the variable.
+2. An `@supports` block that redefines each shade from `--color-primary` with relative colors, using the same math as the other outputs:
 
 ```css
---color-primary-500: oklch(from var(--color-primary) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
+--color-primary-500: oklch(from var(--color-primary, #223859) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
 ```
+
+Each formula also has your color as the `var()` fallback, so the palette still works when nothing sets `--color-primary`, even if you paste only this block. (With `--plain`, that fallback is the only default: a `:root` default could win over your own rule just by coming later.)
 
 Then set the color on `:root` however you like, e.g. `document.documentElement.style.setProperty('--color-primary', '#1f6f43')`, and every shade follows. The shades are computed on `:root`, so set it there, not on an inner element.
 
-Your color's shade (here `700`) is `var(--color-primary)` itself. The Tailwind color the curve follows and the shade that holds the runtime color are picked from your color when you run the command; the runtime color then moves every shade's lightness, chroma and hue. A color far from yours (another hue, much lighter or darker) still gets a smooth palette, but with your color's curve.
+Your color's shade (here `700`) is `var(--color-primary, #223859)` itself. The Tailwind color the curve follows and the shade that holds the runtime color are picked from your color when you run the command; the runtime color then moves every shade's lightness, chroma and hue. A color far from yours (another hue, much lighter or darker) still gets a smooth palette, but with your color's curve.
 
 | Option | |
 | --- | --- |

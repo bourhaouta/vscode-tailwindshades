@@ -9,14 +9,27 @@ import { PALETTE_V4 } from '../src/tailwind-palette'
 /**
  * Evaluates the CSS math the live output writes (numbers, l/c/h, + - * /,
  * calc(), min(), max(), clamp(), pow(), cos() and sin() of `<number>deg`), the way a browser does for
- * `oklch(from <color> ...)`. A missing hue is 0, like `none` in CSS.
+ * `oklch(from <color> ...)`. A missing hue is 0, like `none` in CSS. Without
+ * `from` (the variable is not set), it uses the var() fallback, like a browser.
  */
-function evaluate(value: string, from: Color, name = 'primary'): Color {
-  if (value === `var(--color-${name})`) return from
-  const prefix = `oklch(from var(--color-${name}) `
-  expect(value.startsWith(prefix) && value.endsWith(')')).toBe(true)
+function evaluate(value: string, from: Color | undefined, name = 'primary'): Color {
+  // var(--color-<name>) or var(--color-<name>, <fallback color>)
+  const source = new RegExp(`^var\\(--color-${name}(?:, ((?:[^()]|\\([^()]*\\))+))?\\)`)
+  const relative = value.startsWith('oklch(from ')
+  const match = value.slice(relative ? 'oklch(from '.length : 0).match(source)
+  expect(match).not.toBeNull()
+  if (from === undefined) {
+    expect(match![1]).toBeDefined()
+    from = parseColor(match![1])!
+  }
+  if (!relative) {
+    expect(match![0]).toBe(value)
+    return from
+  }
+  const rest = value.slice('oklch(from '.length + match![0].length)
+  expect(rest.startsWith(' ') && rest.endsWith(')')).toBe(true)
 
-  const tokens = value.slice(prefix.length, -1).match(/\d*\.?\d+|[a-z]+|[-+*/(),]/g)!
+  const tokens = rest.slice(1, -1).match(/\d*\.?\d+|[a-z]+|[-+*/(),]/g)!
   const channels: Record<string, number> = { l: from.l, c: from.c, h: from.h ?? 0 }
   let at = 0
   const next = () => tokens[at++]
@@ -178,7 +191,7 @@ describe('live and Shopify outputs', () => {
 
     const input = parseColor('#223859')!
     const live = liveShades(text)
-    expect(live.get(700)).toBe('var(--color-primary)')
+    expect(live.get(700)).toBe('var(--color-primary, #223859)')
     expect([...live.values()].map((value) => formatColor(evaluate(value, input), 'hex'))).toEqual(scale)
   })
 
@@ -225,7 +238,7 @@ describe('live and Shopify outputs', () => {
     expect(text).toContain('"type": "color",\n  "id": "color_primary",\n  "label": "Primary",\n  "default": "#223859"')
     expect(text).toContain('/* snippets/css-variables.liquid')
     expect(text).toContain('--color-primary: {{ settings.color_primary }};')
-    expect(text).toMatch(/@theme \{\n {2}--color-primary-50: oklch\(/)
+    expect(text).toMatch(/@theme \{\n {2}--color-primary: #223859;\n {2}--color-primary-50: oklch\(/)
     expect(text).toContain('@supports (color: oklch(from red l c h)) {\n  :root {\n    --color-primary-50: oklch(from')
     // Liquid color filters break the theme editor's live preview
     expect(text).not.toMatch(/\| *color_/)
@@ -236,7 +249,7 @@ describe('live and Shopify outputs', () => {
     expect(text).toContain('"id": "color_brand_dark"')
     expect(text).toContain('"label": "Brand Dark"')
     expect(text).toContain('--color-brand-dark: {{ settings.color_brand_dark }};')
-    expect(liveShades(text, 'brand-dark').get(500)).toMatch(/^oklch\(from var\(--color-brand-dark\) /)
+    expect(liveShades(text, 'brand-dark').get(500)).toMatch(/^oklch\(from var\(--color-brand-dark, #223859\) /)
 
     // Valid names with a trailing or doubled dash
     expect(createPalette({ color: '#223859', name: 'brand-', output: 'shopify' }).text).toContain('"label": "Brand"')
@@ -310,9 +323,30 @@ describe('live and Shopify outputs', () => {
   })
 
   it('writes the default color for the live output', () => {
-    expect(live('#223859').text).toMatch(/^\/\* The color to follow: .+\*\/\n@layer base \{\n {2}:root \{\n {4}--color-primary: #223859;\n {2}\}\n\}\n/)
+    // In @theme, so it also makes a bg-primary utility, and in every formula's var() fallback
+    expect(live('#223859').text).toMatch(/\n@theme \{\n {2}--color-primary: #223859;\n {2}--color-primary-50: /)
+    expect(live('#223859').text).not.toContain('@layer')
     // Hex can't hold colors outside sRGB
     expect(live('oklch(70% 0.37 150)').text).toMatch(/--color-primary: oklch\([^)]+\);/)
+    // Without Tailwind, a :root default could override the runtime value, so it is only the fallback
+    const plain = live('#223859', { plain: true }).text
+    expect(plain).not.toMatch(/--color-primary: /)
+    expect(liveShades(plain).get(700)).toBe('var(--color-primary, #223859)')
+  })
+
+  it('falls back to the default color when nothing sets the variable', () => {
+    for (const input of ['#223859', '#db4d53', '#777777', 'oklch(70% 0.37 150)']) {
+      for (const output of [live, shopify]) {
+        for (const options of [{ semantic: true }, { semantic: true, plain: true }]) {
+          const { text, palette } = output(input, options)
+          const values = liveShades(text)
+          expect(values.size).toBe(palette.shades.length)
+          // Each formula alone gives the default palette, so pasting part of the code can't break it
+          for (const { shade, color } of palette.shades) expectSameColor(evaluate(values.get(shade)!, undefined), color)
+          expect(liveForeground(text)).toContain('var(--color-primary, ')
+        }
+      }
+    }
     expect(live('#223859').text).not.toContain('settings')
     expect(live('#223859', { plain: true }).text).not.toContain('@theme')
   })
