@@ -119,9 +119,11 @@ npx tailwindshades-cli "#db4d53" --name brand
 | `-n, --name` | letters, digits and dashes | the closest Tailwind color |
 | `-t, --tailwind` | `4`, `3`, `2`, `1` | `4` |
 | `-f, --format` | `oklch`, `hex`, `rgb` | `oklch` for v4, `hex` before |
-| `-o, --output` | `theme`, `config`, `css` | `theme` for v4, `config` before |
+| `-o, --output` | `theme`, `config`, `css`, `live`, `shopify` | `theme` for v4, `config` before |
 
 The palette goes to stdout, so you can add it to a file: `npx tailwindshades-cli db4d53 -o css >> colors.css`. More in the [package README](packages/core#readme).
+
+**Colors picked at runtime**: `-o live` writes CSS where every shade follows one variable, set by a user, a tenant or a CMS (relative colors: Chrome 119+, Safari 18+, Firefox 128+, with the static palette as the fallback). `-o shopify` adds the theme editor setting for Shopify themes. See [Colors picked at runtime](packages/core#colors-picked-at-runtime).
 
 ## Use it with AI agents
 

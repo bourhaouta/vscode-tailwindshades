@@ -12,7 +12,9 @@ Options:
   -n, --name <name>        Color name, e.g. brand (default: closest Tailwind color)
   -t, --tailwind <4|3|2|1> Tailwind CSS version (default: 4)
   -f, --format <format>    oklch, hex or rgb (default: oklch for v4, hex for older)
-  -o, --output <output>    theme, config or css (default: theme for v4, config for older)
+  -o, --output <output>    theme, config, css, live or shopify (default: theme for v4, config for older)
+      --plain              With -o live or shopify: a plain :root block instead of @theme (no Tailwind)
+      --semantic           With -o live or shopify: also write --color-<name>-foreground
   -h, --help               Show this help
   -v, --version            Show the version
 
@@ -20,11 +22,18 @@ Examples:
   npx tailwindshades-cli "#db4d53" --name brand
   npx tailwindshades-cli "oklch(62% 0.2 250)" -t 3 -o config
   npx tailwindshades-cli db4d53 -o css >> colors.css
+  npx tailwindshades-cli "#223859" -n primary -o live
+  npx tailwindshades-cli "#223859" -n primary -o shopify
+
+Live output: the palette follows one CSS variable, --color-<name>, set at
+runtime (a user, tenant or CMS color). The browser rebuilds every shade from it.
+Shopify output: the same, plus the theme editor setting that sets it.
+Both need Tailwind v4.
 `
 
 const VERSIONS = ['4', '3', '2', '1']
 const FORMATS: ColorFormat[] = ['oklch', 'hex', 'rgb']
-const OUTPUTS: Record<string, Output> = { theme: 'theme', config: 'config', css: 'cssVariables' }
+const OUTPUTS: Record<string, Output> = { theme: 'theme', config: 'config', css: 'cssVariables', live: 'live', shopify: 'shopify' }
 
 export type CliResult = { code: number; stdout: string; stderr: string }
 
@@ -44,6 +53,8 @@ export function runCli(args: string[]): CliResult {
         tailwind: { type: 'string', short: 't' },
         format: { type: 'string', short: 'f' },
         output: { type: 'string', short: 'o' },
+        plain: { type: 'boolean' },
+        semantic: { type: 'boolean' },
         help: { type: 'boolean', short: 'h' },
         version: { type: 'boolean', short: 'v' },
       },
@@ -63,6 +74,11 @@ export function runCli(args: string[]): CliResult {
     const tailwind = choice('tailwind', values.tailwind, VERSIONS)
     const format = choice('format', values.format, FORMATS)
     const output = choice('output', values.output, Object.keys(OUTPUTS))
+    for (const flag of ['plain', 'semantic'] as const) {
+      if (values[flag] && output !== 'live' && output !== 'shopify') {
+        throw new Error(`--${flag} only works with --output live or shopify`)
+      }
+    }
 
     const result = createPalette({
       color,
@@ -70,6 +86,8 @@ export function runCli(args: string[]): CliResult {
       version: tailwind ? (Number(tailwind) as TailwindVersion) : undefined,
       format: format as ColorFormat | undefined,
       output: output ? OUTPUTS[output] : undefined,
+      plain: values.plain,
+      semantic: values.semantic,
     })
 
     const { name, shades, version, anchor } = result

@@ -83,7 +83,7 @@ describe('runCli', () => {
     [['#fff', '#000'], 'give exactly one color'],
     [['nope'], 'not a valid CSS color'],
     [['#fff', '-t', '5'], '--tailwind must be one of: 4, 3, 2, 1'],
-    [['#fff', '-o', 'scss'], '--output must be one of: theme, config, css'],
+    [['#fff', '-o', 'scss'], '--output must be one of: theme, config, css, live, shopify'],
     [['#fff', '--nope'], "Unknown option '--nope'"],
   ])('fails on %j', (args, message) => {
     const { code, stdout, stderr } = runCli(args)

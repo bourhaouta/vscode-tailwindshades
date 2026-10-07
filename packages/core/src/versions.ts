@@ -3,7 +3,7 @@ import { PALETTE_V1, PALETTE_V3, PALETTE_V4, type ReferencePalette } from './tai
 
 export type TailwindVersion = 1 | 2 | 3 | 4
 
-export type Output = 'theme' | 'config' | 'cssVariables'
+export type Output = 'theme' | 'config' | 'cssVariables' | 'live' | 'shopify'
 
 export type VersionProfile = {
   version: TailwindVersion
