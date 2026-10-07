@@ -68,7 +68,7 @@ It prints:
 --color-primary-500: oklch(from var(--color-primary, #223859) min(0.959, 0.7143 * l + 0.2883) calc(min(c, 0.132) * 1.0455) calc(h + 0.13));
 ```
 
-Each formula also has your color as the `var()` fallback, so the palette still works when nothing sets `--color-primary`, even if you paste only this block. (With `--plain`, that fallback is the only default: a `:root` default could win over your own rule just by coming later.)
+Each formula also has your color as the `var()` fallback, so the palette still works when nothing sets `--color-primary`, even if you paste only this block. (With `--plain`, the default `--color-primary` is in `@layer base` instead of `@theme`, so it still loses to any rule that sets the variable, whatever the order.)
 
 Then set the color on `:root` however you like, e.g. `document.documentElement.style.setProperty('--color-primary', '#1f6f43')`, and every shade follows. The shades are computed on `:root`, so set it there, not on an inner element.
 
@@ -76,7 +76,7 @@ Your color's shade (here `700`) is `var(--color-primary, #223859)` itself. The T
 
 | Option | |
 | --- | --- |
-| `--plain` | A plain `:root` block instead of `@theme`, for projects without Tailwind |
+| `--plain` | Plain `:root` blocks instead of `@theme`, for projects without Tailwind (the default color goes in `@layer base`) |
 | `--semantic` | Also writes `--color-primary-foreground`, for text on the color: white or the darkest shade, whichever has more WCAG contrast with the runtime color (black when your color is the darkest shade itself) |
 
 Relative colors work in Chrome and Edge 119+, Safari 18+ and Firefox 128+. Older browsers skip the `@supports` block and keep the static palette for the default color. The live and Shopify outputs need Tailwind v4 (`-t 4`, the default).

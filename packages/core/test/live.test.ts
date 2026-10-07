@@ -328,9 +328,10 @@ describe('live and Shopify outputs', () => {
     expect(live('#223859').text).not.toContain('@layer')
     // Hex can't hold colors outside sRGB
     expect(live('oklch(70% 0.37 150)').text).toMatch(/--color-primary: oklch\([^)]+\);/)
-    // Without Tailwind, a :root default could override the runtime value, so it is only the fallback
+    // Without Tailwind, in a layer: it loses to any unlayered rule, whatever the order
     const plain = live('#223859', { plain: true }).text
-    expect(plain).not.toMatch(/--color-primary: /)
+    expect(plain).toMatch(/\n@layer base \{\n {2}:root \{\n {4}--color-primary: #223859;\n {2}\}\n\}\n/)
+    expect(plain.match(/--color-primary: /g)).toHaveLength(1)
     expect(liveShades(plain).get(700)).toBe('var(--color-primary, #223859)')
   })
 

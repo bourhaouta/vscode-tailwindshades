@@ -2,7 +2,7 @@
 
 ## 1.5.1
 
-- **Live and Shopify outputs: the palette no longer breaks when nothing sets `--color-<name>`.** Every formula now has your color as its `var()` fallback, so pasting only part of the code (like the `@supports` block, without the Liquid line or the default) gives the default palette instead of empty shades. The default `--color-<name>` now lives in `@theme`, which also adds a `bg-<name>` utility, instead of a separate `@layer base` block.
+- **Live and Shopify outputs: the palette no longer breaks when nothing sets `--color-<name>`.** Every formula now has your color as its `var()` fallback, so pasting only part of the code (like the `@supports` block, without the Liquid line or the default) gives the default palette instead of empty shades. The default `--color-<name>` now lives in `@theme`, which also adds a `bg-<name>` utility, instead of a separate `@layer base` block (which `--plain` keeps).
 - The extension itself has no changes in this version.
 
 ## 1.5.0
