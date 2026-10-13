@@ -45,9 +45,30 @@ describe('tailwindshades-mcp', () => {
   })
 
   describe('generate_palette', () => {
-    it('returns the same code as the CLI and the extension', async () => {
+    it('suggests readable text and button pairs', async () => {
       const result = await call('generate_palette', { color: '#db4d53', name: 'brand' })
-      const expected = createPalette({ color: '#db4d53', name: 'brand' })
+      expect(result.structuredContent).toMatchObject({
+        readablePairs: [
+          { use: 'button', classes: 'bg-brand-600 text-white', level: 'AA' },
+          { use: 'text', classes: 'bg-white text-brand-600' },
+          { use: 'badge', classes: 'bg-brand-100 text-brand-700' },
+          { use: 'dark', classes: 'bg-brand-950 text-brand-400' },
+        ],
+        avoid: { classes: 'bg-brand-500 text-white' },
+      })
+      expect(result.structuredContent).toMatchObject({ code: expect.stringContaining('/* Readable pairs') })
+    })
+
+    it('skips readable pairs for live output, whose shades change at runtime', async () => {
+      const result = await call('generate_palette', { color: '#db4d53', name: 'brand', output: 'live' })
+      expect(result.isError).toBeFalsy()
+      expect(result.structuredContent).not.toHaveProperty('readablePairs')
+      expect(result.structuredContent).toMatchObject({ code: expect.not.stringContaining('Readable pairs') })
+    })
+
+    it('returns the same code as the CLI and the extension, with readable pairs', async () => {
+      const result = await call('generate_palette', { color: '#db4d53', name: 'brand' })
+      const expected = createPalette({ color: '#db4d53', name: 'brand', pairs: true })
       expect(result.isError).toBeFalsy()
       expect(result.structuredContent).toMatchObject({
         code: expected.text,
@@ -95,7 +116,8 @@ describe('tailwindshades-mcp', () => {
       const { code, shades, output } = result.structuredContent as { code: string; shades: unknown[]; output: string }
       expect(output).toBe('css')
       expect(shades).toHaveLength(10)
-      expect(code.split('\n')[0]).toMatch(/^--brand-50: rgb\(\d+, \d+, \d+\);$/)
+      // After the readable pairs comment
+      expect(code.split('\n').find((line) => line.startsWith('--'))).toMatch(/^--brand-50: rgb\(\d+, \d+, \d+\);$/)
     })
 
     it('writes Shopify theme code that follows the merchant color', async () => {

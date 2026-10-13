@@ -33,6 +33,20 @@ describe('formatPalette', () => {
     expect(lines.at(-1)).toBe('    },')
   })
 
+  it('adds a readable pairs comment above the palette', () => {
+    const lines = formatPalette({ ...base, output: 'theme', pairs: true }).split('\n')
+    expect(lines[0]).toBe('/* Readable pairs (WCAG AA, 4.5:1 or more):')
+    expect(lines[1]).toMatch(/^ {3}button +bg-brand-\d+ text-\S+ +[\d.]+:1$/)
+    expect(lines.find((line) => line.endsWith('*/'))).toBeDefined()
+    expect(lines[lines.findIndex((line) => line.endsWith('*/')) + 1]).toBe('@theme {')
+  })
+
+  it('names variables in the pairs comment for plain CSS variables', () => {
+    const text = formatPalette({ ...base, output: 'cssVariables', pairs: true })
+    expect(text).toMatch(/white on --brand-\d+/)
+    expect(text).not.toContain('bg-')
+  })
+
   it('writes plain CSS variables', () => {
     const text = formatPalette({ ...base, output: 'cssVariables' })
     expect(text.split('\n')[0]).toMatch(/^--brand-50: #[0-9a-f]{6};$/)

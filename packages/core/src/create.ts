@@ -1,3 +1,4 @@
+import { readablePairs, type ReadablePairs } from './contrast.js'
 import { formatPalette, isValidName } from './format.js'
 import { formatColor, generatePalette, parseColor, type ColorFormat, type Palette } from './palette.js'
 import { LATEST_VERSION, VERSIONS, type Output, type TailwindVersion } from './versions.js'
@@ -15,6 +16,11 @@ export type CreateOptions = {
   output?: Output
   /** One level of indentation. Defaults to two spaces */
   indent?: string
+  /**
+   * Adds a comment above the palette with readable text and background pairs.
+   * Not for live and shopify outputs: their shades change at runtime
+   */
+  pairs?: boolean
   /** Live and Shopify outputs: a plain `:root` block instead of `@theme`, for projects without Tailwind */
   plain?: boolean
   /** Live and Shopify outputs: also write `--color-<name>-foreground` */
@@ -40,6 +46,11 @@ export type CreateResult = {
    * or a plain `:root` block)
    */
   replacesTailwindColor: boolean
+  /**
+   * Text and background pairs that pass WCAG AA, and the obvious one that fails.
+   * Undefined for live and shopify outputs: their shades change at runtime
+   */
+  readablePairs?: ReadablePairs
   palette: Palette
 }
 
@@ -80,6 +91,7 @@ export function createPalette(options: CreateOptions): CreateResult {
     colorFormat: format,
     indent: options.indent ?? '  ',
     baseIndent: '',
+    pairs: options.pairs,
     plain: options.plain,
     semantic: options.semantic,
   })
@@ -95,6 +107,7 @@ export function createPalette(options: CreateOptions): CreateResult {
     shades: palette.shades.map(({ shade, color }) => ({ shade, value: formatColor(color, format) })),
     replacesTailwindColor:
       output !== 'cssVariables' && !(live && options.plain) && Object.hasOwn(profile.reference.colors, name),
+    readablePairs: live ? undefined : readablePairs(palette),
     palette,
   }
 }

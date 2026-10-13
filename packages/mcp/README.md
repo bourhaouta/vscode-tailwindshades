@@ -91,6 +91,17 @@ A full palette from one color, ready to paste.
 
 Returns the code, plus the shades, the shade that holds the input color and the closest Tailwind color as structured data.
 
+The code starts with a comment of readable pairs: text and background classes that pass WCAG AA (4.5:1), tested on the real shades. Agents use them for buttons and text, so a red brand gets `bg-brand-600 text-white` instead of the failing `bg-brand-500 text-white`:
+
+```css
+/* Readable pairs (WCAG AA, 4.5:1 or more):
+   button     bg-brand-600 text-white      5.09:1
+   text       bg-white text-brand-600      5.09:1
+   badge      bg-brand-100 text-brand-700  5.43:1
+   dark mode  bg-brand-950 text-brand-400  5.33:1
+   avoid      bg-brand-500 text-white      4.03:1 */
+```
+
 ### `find_closest_tailwind_color`
 
 The Tailwind shade that looks most like a color, e.g. `#db4d53` → `red-500`, with Tailwind's value, the distance, and whether the difference is visible. Agents use it to pick an existing class instead of an arbitrary value, or to decide a custom palette is needed.
