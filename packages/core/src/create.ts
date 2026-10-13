@@ -16,8 +16,15 @@ export type CreateOptions = {
   output?: Output
   /** One level of indentation. Defaults to two spaces */
   indent?: string
-  /** Adds a comment above the palette with readable text and background pairs */
+  /**
+   * Adds a comment above the palette with readable text and background pairs.
+   * Not for live and shopify outputs: their shades change at runtime
+   */
   pairs?: boolean
+  /** Live and Shopify outputs: a plain `:root` block instead of `@theme`, for projects without Tailwind */
+  plain?: boolean
+  /** Live and Shopify outputs: also write `--color-<name>-foreground` */
+  semantic?: boolean
 }
 
 export type CreateResult = {
@@ -35,11 +42,15 @@ export type CreateResult = {
   shades: { shade: number; value: string }[]
   /**
    * True when the code replaces one of Tailwind's default palettes: `name` is a
-   * default Tailwind color and the output is one Tailwind reads (not plain CSS variables)
+   * default Tailwind color and the output is one Tailwind reads (not plain CSS variables
+   * or a plain `:root` block)
    */
   replacesTailwindColor: boolean
-  /** Text and background pairs that pass WCAG AA, and the obvious one that fails */
-  readablePairs: ReadablePairs
+  /**
+   * Text and background pairs that pass WCAG AA, and the obvious one that fails.
+   * Undefined for live and shopify outputs: their shades change at runtime
+   */
+  readablePairs?: ReadablePairs
   palette: Palette
 }
 
@@ -69,6 +80,10 @@ export function createPalette(options: CreateOptions): CreateResult {
 
   const format = options.format ?? profile.colorFormat
   const output = options.output ?? defaultOutput(version)
+  const live = output === 'live' || output === 'shopify'
+  if (live && version !== 4) {
+    throw new Error(`the ${output} output needs Tailwind CSS v4 (relative colors and @theme), not v${version}`)
+  }
   const text = formatPalette({
     name,
     palette,
@@ -77,6 +92,8 @@ export function createPalette(options: CreateOptions): CreateResult {
     indent: options.indent ?? '  ',
     baseIndent: '',
     pairs: options.pairs,
+    plain: options.plain,
+    semantic: options.semantic,
   })
 
   return {
@@ -88,8 +105,9 @@ export function createPalette(options: CreateOptions): CreateResult {
     anchor: palette.anchor,
     family: palette.family,
     shades: palette.shades.map(({ shade, color }) => ({ shade, value: formatColor(color, format) })),
-    replacesTailwindColor: output !== 'cssVariables' && Object.hasOwn(profile.reference.colors, name),
-    readablePairs: readablePairs(palette),
+    replacesTailwindColor:
+      output !== 'cssVariables' && !(live && options.plain) && Object.hasOwn(profile.reference.colors, name),
+    readablePairs: live ? undefined : readablePairs(palette),
     palette,
   }
 }

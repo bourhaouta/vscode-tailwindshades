@@ -59,6 +59,13 @@ describe('tailwindshades-mcp', () => {
       expect(result.structuredContent).toMatchObject({ code: expect.stringContaining('/* Readable pairs') })
     })
 
+    it('skips readable pairs for live output, whose shades change at runtime', async () => {
+      const result = await call('generate_palette', { color: '#db4d53', name: 'brand', output: 'live' })
+      expect(result.isError).toBeFalsy()
+      expect(result.structuredContent).not.toHaveProperty('readablePairs')
+      expect(result.structuredContent).toMatchObject({ code: expect.not.stringContaining('Readable pairs') })
+    })
+
     it('returns the same code as the CLI and the extension, with readable pairs', async () => {
       const result = await call('generate_palette', { color: '#db4d53', name: 'brand' })
       const expected = createPalette({ color: '#db4d53', name: 'brand', pairs: true })
@@ -113,11 +120,27 @@ describe('tailwindshades-mcp', () => {
       expect(code.split('\n').find((line) => line.startsWith('--'))).toMatch(/^--brand-50: rgb\(\d+, \d+, \d+\);$/)
     })
 
+    it('writes Shopify theme code that follows the merchant color', async () => {
+      const result = await call('generate_palette', { color: '#223859', name: 'primary', output: 'shopify', semantic: true })
+      const expected = createPalette({ color: '#223859', name: 'primary', output: 'shopify', semantic: true })
+      expect(result.structuredContent).toMatchObject({ code: expected.text, output: 'shopify', inputShade: 700 })
+      expect(result.content[0]).toMatchObject({ text: expect.stringContaining('paste each one where its comment says') })
+      expect(client.getInstructions()).toContain('output "shopify"')
+
+      const live = await call('generate_palette', { color: '#223859', name: 'primary', output: 'live' })
+      expect(live.structuredContent).toMatchObject({
+        code: createPalette({ color: '#223859', name: 'primary', output: 'live' }).text,
+        output: 'live',
+      })
+      expect(client.getInstructions()).toContain('output "live"')
+    })
+
     it.each([
       [{ color: 'nope' }, 'not a valid CSS color'],
       [{ color: '#fff', name: '1st' }, 'letters, digits and dashes'],
       [{ color: '#fff', tailwindVersion: 5 }, 'tailwindVersion'],
       [{ color: '#fff', output: 'scss' }, 'output'],
+      [{ color: '#fff', output: 'shopify', tailwindVersion: 3 }, 'needs Tailwind CSS v4'],
     ])('returns an error for %j', async (args, message) => {
       const result = await call('generate_palette', args)
       expect(result.isError).toBe(true)
