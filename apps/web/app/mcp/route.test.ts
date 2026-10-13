@@ -53,6 +53,16 @@ describe('/mcp', () => {
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
   })
 
+  it('refuses listen streams, which would stay open until the function times out', async () => {
+    const client = new Client({ name: 'test', version: '1.0.0' }, { versionNegotiation: { mode: { pin: '2026-07-28' } } })
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL('https://tailwindshades.bourhaouta.com/mcp'), { fetch: fetchRoute }),
+    )
+
+    await expect(client.listen({ toolsListChanged: true }, { timeout: 2000 })).rejects.toThrow('Subscription limit reached')
+    await client.close()
+  })
+
   it('logs the name of each client that connects', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const client = new Client({ name: 'test-client', version: '2.0.0' })

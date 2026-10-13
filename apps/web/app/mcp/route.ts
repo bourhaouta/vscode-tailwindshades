@@ -4,7 +4,9 @@ import { createMcpHandler } from '@modelcontextprotocol/server'
 import { track } from '@vercel/analytics/server'
 import { createServer } from 'tailwindshades-mcp'
 
-const handler = createMcpHandler(createServer)
+// No listen streams: the tools never change, so there is nothing to send, and
+// each stream would stay open until Vercel stops the function (300s timeouts)
+const handler = createMcpHandler(createServer, { maxSubscriptions: 0 })
 
 // Every request runs the handler; never prerender or cache it
 export const dynamic = 'force-dynamic'
