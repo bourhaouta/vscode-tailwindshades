@@ -13,6 +13,7 @@ import {
 } from 'tailwindshades-cli'
 import { DEFAULTS, parseSettings, toSearch, type Settings } from '@/lib/settings'
 import CodeBlock from './CodeBlock'
+import Pairs from './Pairs'
 import Segmented from './Segmented'
 
 type Swatch = { shade: number; color: Color }
@@ -175,6 +176,17 @@ export default function Generator() {
               <Strip label={`Your palette: ${palette.name}`} swatches={palette.palette.shades} marked={palette.anchor} />
               <Strip label={`Tailwind's ${palette.family}, the curve it follows`} swatches={tailwindSwatches} />
             </div>
+
+            {palette.readablePairs && (
+              <div className="mt-6">
+                <Pairs
+                  name={palette.name}
+                  output={palette.output}
+                  palette={palette.palette}
+                  pairs={palette.readablePairs}
+                />
+              </div>
+            )}
 
             {palette.replacesTailwindColor && (
               <p className="mt-4 text-sm text-muted">
