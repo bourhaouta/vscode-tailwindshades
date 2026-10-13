@@ -105,6 +105,18 @@ Each version uses its own default palette as the reference, so a v1 palette look
 | `tailwindshades.colorFormat` | `auto` (OKLCH for v4, hex before) | `auto`, `oklch`, `hex`, `rgb` |
 | `tailwindshades.output` | `auto` (from the file type) | `auto`, `theme`, `config`, `cssVariables` |
 | `tailwindshades.promptForName` | `true` | Ask for the color name |
+| `tailwindshades.readablePairs` | `false` | Add a comment with text and background pairs that pass WCAG AA contrast |
+
+With `readablePairs` on, the palette starts with a comment like this, tested on the real shades:
+
+```css
+/* Readable pairs (WCAG AA, 4.5:1 or more):
+   button     bg-brand-600 text-white      5.09:1
+   text       bg-white text-brand-600      5.09:1
+   badge      bg-brand-100 text-brand-700  5.43:1
+   dark mode  bg-brand-950 text-brand-400  5.33:1
+   avoid      bg-brand-500 text-white      4.03:1 */
+```
 
 ## Command line
 
