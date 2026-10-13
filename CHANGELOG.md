@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0
+
+- **MCP server: readable pairs in `generate_palette`.** The code now starts with a short comment of text and background pairs that pass WCAG AA contrast (4.5:1), tested on the real shades: a button, text on white, a soft badge and text in dark mode, plus the obvious pair to avoid. For `#db4d53`, agents get `bg-brand-600 text-white` (5.09:1) instead of the failing `bg-brand-500 text-white` (4.03:1); a yellow gets dark text instead. The comment stays in the project's CSS, so agents see it in later sessions too. The same pairs come back as structured data (`readablePairs`, `avoid`). Live and Shopify outputs skip them, since their shades change at runtime.
+- **Extension: new `tailwindshades.readablePairs` setting** (off by default) to add the same comment when you generate a palette.
+- **Remote MCP server: no more stuck connections.** Newer clients open a `subscriptions/listen` stream to hear about tool changes. The tools never change, so the server now refuses it right away instead of keeping it open until the 300-second time limit.
+- **Library**: new `contrastRatio` and `readablePairs`, and a `pairs` option for `createPalette` and `formatPalette`.
+
 ## 1.5.1
 
 - **Live and Shopify outputs: the palette no longer breaks when nothing sets `--color-<name>`.** Every formula now has your color as its `var()` fallback, so pasting only part of the code (like the `@supports` block, without the Liquid line or the default) gives the default palette instead of empty shades. The default `--color-<name>` now lives in `@theme`, which also adds a `bg-<name>` utility, instead of a separate `@layer base` block (which `--plain` keeps).
