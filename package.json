@@ -108,6 +108,11 @@
           "type": "boolean",
           "default": true,
           "description": "Ask for the color name (the closest Tailwind color name is suggested)."
+        },
+        "tailwindshades.readablePairs": {
+          "type": "boolean",
+          "default": false,
+          "description": "Add a comment above the palette with text and background pairs that pass WCAG AA contrast, e.g. bg-brand-600 text-white for buttons."
         }
       }
     }

@@ -31,6 +31,7 @@ type Settings = {
   colorFormat: 'auto' | ColorFormat
   output: 'auto' | Output
   promptForName: boolean
+  readablePairs: boolean
 }
 
 function getSettings(scope: vscode.Uri): Settings {
@@ -40,6 +41,7 @@ function getSettings(scope: vscode.Uri): Settings {
     colorFormat: config.get('colorFormat', 'auto'),
     output: config.get('output', 'auto'),
     promptForName: config.get('promptForName', true),
+    readablePairs: config.get('readablePairs', false),
   }
 }
 
@@ -242,6 +244,7 @@ async function generate({ output: forcedOutput, choose = false }: RunOptions = {
     indent,
     baseIndent,
     insideTheme: output === 'theme' && isInsideThemeBlock(textBefore),
+    pairs: settings.readablePairs,
   })
 
   const applied = await editor.edit((builder) => builder.replace(input.range, text))
