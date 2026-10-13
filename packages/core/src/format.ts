@@ -1,5 +1,6 @@
 import { readablePairs, type PairColor } from './contrast.js'
 import { formatColor, type ColorFormat, type Palette } from './palette.js'
+import { formatLive, formatShopify } from './live.js'
 import type { Output, VersionProfile } from './versions.js'
 
 export type FormatOptions = {
@@ -13,8 +14,15 @@ export type FormatOptions = {
   baseIndent: string
   /** True when the cursor is already inside an `@theme { ... }` block */
   insideTheme?: boolean
-  /** Adds a comment above the palette with readable text and background pairs */
+  /**
+   * Adds a comment above the palette with readable text and background pairs.
+   * Not for live and shopify outputs: their shades change at runtime
+   */
   pairs?: boolean
+  /** Live and Shopify outputs: a plain `:root` block instead of `@theme`, for projects without Tailwind */
+  plain?: boolean
+  /** Live and Shopify outputs: also write `--color-<name>-foreground` */
+  semantic?: boolean
 }
 
 const CSS_LANGUAGES = ['css', 'scss', 'sass', 'less', 'postcss', 'tailwindcss', 'vue-postcss']
@@ -86,7 +94,8 @@ export function formatPalette(options: FormatOptions): string {
     value: formatColor(color, colorFormat),
   }))
   const newline = `\n${baseIndent}`
-  const comment = pairs ? formatPairsComment(name, palette, output) : []
+  // Live and shopify shades change at runtime, so pairs tested on this color could be wrong
+  const comment = pairs && output !== 'live' && output !== 'shopify' ? formatPairsComment(name, palette, output) : []
 
   switch (output) {
     case 'theme': {
@@ -103,6 +112,13 @@ export function formatPalette(options: FormatOptions): string {
       const key = /^[a-z_$][\w$]*$/i.test(name) ? name : `'${name}'`
       const lines = entries.map(({ shade, value }) => `${indent}${shade}: '${value}',`)
       return [...comment, `${key}: {`, ...lines, '},'].join(newline)
+    }
+
+    // Several blocks (or files) of code, so they always start at the beginning of a line
+    case 'live':
+    case 'shopify': {
+      const format = output === 'live' ? formatLive : formatShopify
+      return format({ name, palette, colorFormat, indent, plain: options.plain, semantic: options.semantic })
     }
   }
 }

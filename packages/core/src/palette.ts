@@ -13,6 +13,34 @@ export type Palette = {
   anchor: number
   /** Shades in order, lightest first */
   shades: { shade: number; color: Color }[]
+  /** How the shades follow the input color, to rebuild them from another color */
+  curve: PaletteCurve
+}
+
+/** One shade of a curve: Tailwind's own color there, and how far it is from the anchor */
+export type ShadeRule = {
+  shade: number
+  /** Reference color [Lᵢ, Cᵢ, Hᵢ] */
+  reference: Oklch
+  /** 0 at the anchor, 1 at the lightest/darkest shade: how much of the input's lightness shift fades out */
+  fade: number
+  /** Hᵢ − Hₐ: Tailwind's hue drift from the anchor, in degrees */
+  hueShift: number
+}
+
+/**
+ * The part of a palette that doesn't depend on the input color: the Tailwind
+ * color it follows and the anchor shade. `applyCurve` turns it into shades.
+ */
+export type PaletteCurve = {
+  /** Index of the anchor shade in `shades` */
+  anchor: number
+  /** Reference color at the anchor [Lₐ, Cₐ, Hₐ] */
+  reference: Oklch
+  /** True when the anchor is gray (Cₐ ≤ 0.005): chroma then fades from the input's instead of scaling */
+  gray: boolean
+  /** Shades in order, lightest first */
+  shades: ShadeRule[]
 }
 
 const toOklch = converter('oklch')
@@ -74,33 +102,47 @@ export function generatePalette(color: Color, reference: ReferencePalette): Pale
   // The family comes from the default match (hue first). Inside it, the shade
   // that looks the same keeps the lightness shift, and so the curve's bend, small.
   const { family } = closestTailwindShade(color, reference)
-  const curve = reference.colors[family]
   const { index: anchor } = closestTailwindShade(
     color,
-    { shades: reference.shades, colors: { [family]: curve } },
+    { shades: reference.shades, colors: { [family]: reference.colors[family] } },
     { lightnessWeight: 1 },
   )
-  const [refL, refC, refH] = curve[anchor]
-  const last = curve.length - 1
+  const curve = paletteCurve(reference.colors[family], reference.shades, anchor)
+  return { family, anchor: reference.shades[anchor], shades: applyCurve(color, curve), curve }
+}
 
+/** The curve of Tailwind color `colors` (one family), anchored at shade index `anchor` */
+export function paletteCurve(colors: readonly Oklch[], shades: readonly number[], anchor: number): PaletteCurve {
+  const [, refC, refH] = colors[anchor]
+  const last = colors.length - 1
+
+  return {
+    anchor,
+    reference: colors[anchor],
+    gray: refC <= 0.005,
+    shades: colors.map((reference, index) => {
+      // The shift fades out toward the ends so they stay as light/dark as Tailwind's
+      const end = index < anchor ? 0 : last
+      const fade = index === anchor ? 0 : Math.abs(index - anchor) / Math.abs(end - anchor)
+      return { shade: shades[index], reference, fade, hueShift: hueDifference(refH, reference[2]) }
+    }),
+  }
+}
+
+/** Builds the shades of `curve` around `color`, which stays unchanged at the anchor */
+export function applyCurve(color: Color, curve: PaletteCurve): Palette['shades'] {
+  const [refL, refC] = curve.reference
   const lightnessShift = color.l - refL
   // How much more (or less) colorful the input is than the matched Tailwind shade
-  const chromaScale = refC > 0.005 ? Math.min(color.c / refC, 3) : undefined
+  const chromaScale = curve.gray ? undefined : Math.min(color.c / refC, 3)
 
   let previousL = Infinity
 
-  const shades = curve.map(([l, c, h], index) => {
-    const shade = reference.shades[index]
-
-    if (index === anchor) {
+  return curve.shades.map(({ shade, reference: [l, c, h], fade, hueShift }, index) => {
+    if (index === curve.anchor) {
       previousL = color.l
       return { shade, color }
     }
-
-    // 0 at the anchor, 1 at the lightest/darkest shade: the shift fades out
-    // toward the ends so they stay as light/dark as Tailwind's
-    const end = index < anchor ? 0 : last
-    const fade = Math.abs(index - anchor) / Math.abs(end - anchor)
 
     // Keep shades strictly darker from lightest to darkest
     const lightness = Math.min(l + lightnessShift * (1 - fade), previousL - 0.005)
@@ -109,7 +151,7 @@ export function generatePalette(color: Color, reference: ReferencePalette): Pale
     const chroma = chromaScale === undefined ? color.c * (1 - fade) : c * chromaScale
 
     // Keep the input hue, plus Tailwind's small hue drift between shades
-    const hue = color.h === undefined ? h : (color.h + hueDifference(refH, h) + 360) % 360
+    const hue = color.h === undefined ? h : (color.h + hueShift + 360) % 360
 
     return {
       shade,
@@ -120,8 +162,6 @@ export function generatePalette(color: Color, reference: ReferencePalette): Pale
       },
     }
   })
-
-  return { family, anchor: reference.shades[anchor], shades }
 }
 
 const round = (value: number, digits: number) => Number(value.toFixed(digits))
