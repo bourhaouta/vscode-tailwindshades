@@ -1,3 +1,4 @@
+import { readablePairs, type ReadablePairs } from './contrast.js'
 import { formatPalette, isValidName } from './format.js'
 import { formatColor, generatePalette, parseColor, type ColorFormat, type Palette } from './palette.js'
 import { LATEST_VERSION, VERSIONS, type Output, type TailwindVersion } from './versions.js'
@@ -15,6 +16,8 @@ export type CreateOptions = {
   output?: Output
   /** One level of indentation. Defaults to two spaces */
   indent?: string
+  /** Adds a comment above the palette with readable text and background pairs */
+  pairs?: boolean
 }
 
 export type CreateResult = {
@@ -35,6 +38,8 @@ export type CreateResult = {
    * default Tailwind color and the output is one Tailwind reads (not plain CSS variables)
    */
   replacesTailwindColor: boolean
+  /** Text and background pairs that pass WCAG AA, and the obvious one that fails */
+  readablePairs: ReadablePairs
   palette: Palette
 }
 
@@ -71,6 +76,7 @@ export function createPalette(options: CreateOptions): CreateResult {
     colorFormat: format,
     indent: options.indent ?? '  ',
     baseIndent: '',
+    pairs: options.pairs,
   })
 
   return {
@@ -83,6 +89,7 @@ export function createPalette(options: CreateOptions): CreateResult {
     family: palette.family,
     shades: palette.shades.map(({ shade, color }) => ({ shade, value: formatColor(color, format) })),
     replacesTailwindColor: output !== 'cssVariables' && Object.hasOwn(profile.reference.colors, name),
+    readablePairs: readablePairs(palette),
     palette,
   }
 }

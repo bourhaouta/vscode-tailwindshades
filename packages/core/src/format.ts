@@ -1,3 +1,4 @@
+import { readablePairs, type PairColor } from './contrast.js'
 import { formatColor, type ColorFormat, type Palette } from './palette.js'
 import type { Output, VersionProfile } from './versions.js'
 
@@ -12,6 +13,8 @@ export type FormatOptions = {
   baseIndent: string
   /** True when the cursor is already inside an `@theme { ... }` block */
   insideTheme?: boolean
+  /** Adds a comment above the palette with readable text and background pairs */
+  pairs?: boolean
 }
 
 const CSS_LANGUAGES = ['css', 'scss', 'sass', 'less', 'postcss', 'tailwindcss', 'vue-postcss']
@@ -48,33 +51,58 @@ export function isInsideThemeBlock(textBefore: string): boolean {
   return true
 }
 
+const PAIR_USES = { button: 'button', text: 'text', badge: 'badge', dark: 'dark mode' }
+
+/**
+ * A comment listing readable pairs, as utility classes (or variables for plain
+ * CSS variables), e.g. `button     bg-brand-600 text-white  5.09:1`
+ */
+export function formatPairsComment(name: string, palette: Palette, output: Output): string[] {
+  const { pairs, avoid } = readablePairs(palette)
+  const color = (value: PairColor) =>
+    value === 'white' ? 'white' : output === 'cssVariables' ? `--${name}-${value}` : `${name}-${value}`
+  const describe = ({ background, text }: { background: PairColor; text: PairColor }) =>
+    output === 'cssVariables'
+      ? `${color(text)} on ${color(background)}`
+      : `bg-${color(background)} text-${color(text)}`
+
+  const rows = [
+    ...pairs.map((pair) => [PAIR_USES[pair.use], describe(pair), `${pair.ratio}:1`]),
+    ...(avoid ? [['avoid', describe(avoid), `${avoid.ratio}:1`]] : []),
+  ]
+  const widths = [0, 1].map((column) => Math.max(...rows.map((row) => row[column].length)))
+  const lines = rows.map(([use, classes, ratio]) => `   ${use.padEnd(widths[0])}  ${classes.padEnd(widths[1])}  ${ratio}`)
+  return ['/* Readable pairs (WCAG AA, 4.5:1 or more):', ...lines.slice(0, -1), `${lines.at(-1)} */`]
+}
+
 /**
  * Builds the text that replaces the selected color. The first line has no
  * indentation (it starts where the selection was); the others use `baseIndent`.
  */
 export function formatPalette(options: FormatOptions): string {
-  const { name, palette, output, colorFormat, indent, baseIndent, insideTheme } = options
+  const { name, palette, output, colorFormat, indent, baseIndent, insideTheme, pairs } = options
   const entries = palette.shades.map(({ shade, color }) => ({
     shade,
     value: formatColor(color, colorFormat),
   }))
   const newline = `\n${baseIndent}`
+  const comment = pairs ? formatPairsComment(name, palette, output) : []
 
   switch (output) {
     case 'theme': {
       const lines = entries.map(({ shade, value }) => `--color-${name}-${shade}: ${value};`)
-      if (insideTheme) return lines.join(newline)
-      return ['@theme {', ...lines.map((line) => indent + line), '}'].join(newline)
+      if (insideTheme) return [...comment, ...lines].join(newline)
+      return [...comment, '@theme {', ...lines.map((line) => indent + line), '}'].join(newline)
     }
 
     case 'cssVariables':
-      return entries.map(({ shade, value }) => `--${name}-${shade}: ${value};`).join(newline)
+      return [...comment, ...entries.map(({ shade, value }) => `--${name}-${shade}: ${value};`)].join(newline)
 
     case 'config': {
       // Names with dashes need quotes as object keys
       const key = /^[a-z_$][\w$]*$/i.test(name) ? name : `'${name}'`
       const lines = entries.map(({ shade, value }) => `${indent}${shade}: '${value}',`)
-      return [`${key}: {`, ...lines, '},'].join(newline)
+      return [...comment, `${key}: {`, ...lines, '},'].join(newline)
     }
   }
 }

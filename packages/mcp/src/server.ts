@@ -6,6 +6,7 @@ import {
   parseColor,
   VERSIONS,
   type Output,
+  type PairColor,
   type TailwindVersion,
 } from 'tailwindshades-cli'
 import * as z from 'zod'
@@ -51,6 +52,12 @@ function tailwindValue(version: TailwindVersion, name: string, index: number) {
     : { oklch: formatColor({ l, c, h }, 'oklch'), hex: exact }
 }
 
+/** Utility classes for a text and background pair, e.g. `bg-brand-600 text-white` */
+function classes(name: string, background: PairColor, text: PairColor) {
+  const color = (value: PairColor) => (value === 'white' ? 'white' : `${name}-${value}`)
+  return `bg-${color(background)} text-${color(text)}`
+}
+
 function parse(input: string) {
   const parsed = parseColor(input)
   if (!parsed) throw new Error(`"${input}" is not a valid CSS color`)
@@ -81,7 +88,8 @@ export function createServer(): McpServer {
         'Use these tools whenever you add or change a color in a Tailwind CSS project. ' +
         'Tailwind colors are palettes with shades (50-950), so utilities like bg-brand-500 and ' +
         'hover:bg-brand-600 work. Never write a single --color-* variable or invent shades by hand: ' +
-        'call generate_palette and paste its code. Match tailwindVersion to the project ' +
+        'call generate_palette and paste its code (keep its readable pairs comment). For text and ' +
+        'buttons in that color, use the readable pairs it returns. Match tailwindVersion to the project ' +
         '(v4: @import "tailwindcss" in CSS; v3 and older: tailwind.config.js). ' +
         'To replace a hard-coded color with an existing Tailwind class, call find_closest_tailwind_color. ' +
         "For Tailwind's own default colors (e.g. the value of slate-500), call get_tailwind_palette " +
@@ -134,6 +142,20 @@ export function createServer(): McpServer {
         inputShade: z.number().describe('Shade that holds the input color unchanged, e.g. 500'),
         closestTailwindColor: z.string().describe('Tailwind color whose curve the palette follows'),
         shades: z.array(z.object({ shade: z.number(), value: z.string() })),
+        readablePairs: z
+          .array(
+            z.object({
+              use: z.enum(['button', 'text', 'badge', 'dark']).describe('dark: text in dark mode'),
+              classes: z.string().describe('e.g. "bg-brand-600 text-white"'),
+              ratio: z.number().describe('WCAG contrast ratio, 4.5 or more'),
+              level: z.enum(['AA', 'AAA']),
+            }),
+          )
+          .describe('Text and background pairs that pass WCAG AA. Use them for text and buttons in this color'),
+        avoid: z
+          .object({ classes: z.string(), ratio: z.number() })
+          .optional()
+          .describe('White text on the input color, when it fails WCAG AA'),
         replacesTailwindColor: z
           .boolean()
           .describe("True when the code replaces a default Tailwind palette (default color name, theme or config output)"),
@@ -147,6 +169,7 @@ export function createServer(): McpServer {
         version: input.tailwindVersion as TailwindVersion | undefined,
         format: input.format,
         output: input.output && OUTPUTS[input.output],
+        pairs: true,
       })
       const output = Object.entries(OUTPUTS).find(([, value]) => value === result.output)![0]
       const structured = {
@@ -158,6 +181,16 @@ export function createServer(): McpServer {
         inputShade: result.anchor,
         closestTailwindColor: result.family,
         shades: result.shades,
+        readablePairs: result.readablePairs.pairs.map(({ use, background, text, ratio, level }) => ({
+          use,
+          classes: classes(result.name, background, text),
+          ratio,
+          level: level as 'AA' | 'AAA',
+        })),
+        avoid: result.readablePairs.avoid && {
+          classes: classes(result.name, result.readablePairs.avoid.background, result.readablePairs.avoid.text),
+          ratio: result.readablePairs.avoid.ratio,
+        },
         replacesTailwindColor: result.replacesTailwindColor,
       }
       const { name, anchor, shades } = result
