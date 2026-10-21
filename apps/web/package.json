@@ -20,7 +20,7 @@
     "vitest": "^5.0.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "^2.2.0",
+    "@modelcontextprotocol/server": "^2.3.1",
     "@vercel/analytics": "^2.0.1",
     "next": "^16.3.8",
     "react": "^19.3.0",
