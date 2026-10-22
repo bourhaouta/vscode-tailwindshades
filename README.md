@@ -6,6 +6,7 @@
 [![npm tailwindshades-cli](https://img.shields.io/npm/v/tailwindshades-cli?label=tailwindshades-cli)](https://www.npmjs.com/package/tailwindshades-cli)
 [![npm tailwindshades-mcp](https://img.shields.io/npm/v/tailwindshades-mcp?label=tailwindshades-mcp)](https://www.npmjs.com/package/tailwindshades-mcp)
 [![CI](https://github.com/bourhaouta/vscode-tailwindshades/actions/workflows/ci.yml/badge.svg)](https://github.com/bourhaouta/vscode-tailwindshades/actions/workflows/ci.yml)
+[![Toolweather](https://toolweather.toolweather.workers.dev/badge/io.github.bourhaouta/tailwindshades.svg)](https://toolweather.pages.dev/servers/io.github.bourhaouta--tailwindshades/)
 
 Generate a full [Tailwind CSS](https://tailwindcss.com/) color palette (`50` to `950`) from any color, right in your editor. Works with **Tailwind v4, v3, v2 and v1**.
 
